@@ -1,8 +1,9 @@
+package neuralNetwork;
 import java.util.Random;
 
 public class RandomSingleton {
 
-	private final static long SEED = 1;
+	private final static long SEED = 0;
 	private RandomSingleton() {}
 	
 	private static Random r;
@@ -23,6 +24,10 @@ public class RandomSingleton {
 	public static float randFloat(float from, float to) {
 		return r.nextFloat() * (to - from) + from;
 
+	}
+
+	public static boolean randBool() {
+		return r.nextDouble()>0.5;
 	}
 
 }

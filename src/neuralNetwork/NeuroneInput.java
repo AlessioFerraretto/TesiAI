@@ -1,9 +1,10 @@
+package neuralNetwork;
 public class NeuroneInput extends Neurone {
 
 	protected float value;
 
 	public NeuroneInput() {
-		super();
+		super(null);
 	}
 
 	public Float getValue() {

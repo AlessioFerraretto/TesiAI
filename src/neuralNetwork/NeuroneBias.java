@@ -1,7 +1,8 @@
+package neuralNetwork;
 public class NeuroneBias extends Neurone {
 
-	public NeuroneBias() {
-		super();
+	public NeuroneBias(ActivationFunctionType activationFunctionType) {
+		super(activationFunctionType);
 	}
 
 	protected Float evaluate() {

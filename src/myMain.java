@@ -1,36 +1,44 @@
-import java.util.ArrayList;
+import neuralNetwork.Input;
+import neuralNetwork.InputType;
+import neuralNetwork.NeuralNetwork;
+import neuralNetwork.NeuralNetworkException;
+import neuralNetwork.RandomSingleton;
 
 public class myMain {
 
 	static long startTime = System.currentTimeMillis();
-	static int N = 10000, IN = 1, OUT = 1;
-	static float LEARNING_RATE = 0.2f;
+	static int N = 1000000, IN = 1, OUT = 1;
 
 	public static void main(String[] args) throws NeuralNetworkException {
 		
 		InputType testType = InputType.TEST;
 		
-		NeuralNetwork nn = new NeuralNetwork(IN, new int[] {2}, OUT);
-
-		for(int k=0;k<N;k++) {
-			Input[] in = new Input[IN];
-			Float[] out = new Float[OUT];
-
-			in[0] = new Input(testType);
-			out[0] = in[0].getValue() * 0.5f;
-			
-			nn.test(in, out);
-
-			if(k%1000 == 0) {
-				printProgressBar(k, N);
-			}
-		}
-		long totalTimeTaken = System.currentTimeMillis() - startTime;
-		System.out.println("\nTotal time taken: " + (totalTimeTaken / 1000.0) + " seconds");
-
-		System.out.println("20: " + Input.deNormalize(nn.evaluate(new Input(20,testType))[0], testType));
-		System.out.println("10: " + Input.deNormalize(nn.evaluate(new Input(10,testType))[0], testType));
-		System.out.println("0: " + Input.deNormalize(nn.evaluate(new Input(0,testType))[0], testType));
+//		NeuralNetwork nn = new NeuralNetwork(IN, new int[] {2}, OUT, null ,null);
+//
+//		for(int k=0;k<N;k++) {
+//			Input[] in = new Input[IN];
+//			Float[] out = new Float[OUT];
+//
+//			in[0] = new Input(RandomSingleton.randFloat(-100, 100), testType);
+//			out[0] = in[0].getValue() * 0.5f;
+//			
+//			nn.test(in, out);
+//
+//			if(k%1000 == 0) {
+//				printProgressBar(k, N);
+//			}
+//		}
+//		long totalTimeTaken = System.currentTimeMillis() - startTime;
+//		System.out.println("\nTotal time taken: " + (totalTimeTaken / 1000.0) + " seconds");
+//
+//		float result = nn.evaluate(new Input(20,testType))[0];
+//		System.out.println("20: " + Input.deNormalize(result, testType) + " " + result);
+//		
+//		result = nn.evaluate(new Input(10,testType))[0];
+//		System.out.println("10: " + Input.deNormalize(result, testType) + " " + result);
+//		
+//		result = nn.evaluate(new Input(0,testType))[0];
+//		System.out.println("0: " + Input.deNormalize(result, testType) + " " + result);
 
 	}
 
