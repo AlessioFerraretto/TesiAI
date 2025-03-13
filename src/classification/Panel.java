@@ -7,26 +7,27 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.plaf.ColorUIResource;
 
-import neuralNetwork.RandomSingleton;
+import common.Point;
 
 public class Panel extends JPanel  {
 
-	public static int DIMENSION = 700;
-	public static final int SIZE = 20;
+	public static final int DIMENSION = 700, SIZE = 20, PREDICTED_SIZE = 2;
+	private static final long timeBetweenPresses = 100;
 	
 	private RepaintListener frame;
-	private ArrayList<Point> points = new ArrayList<Point>();
-	private ArrayList<Point> determinedPoints = new ArrayList<Point>();
-	private long lastPress = 0;
-	private static final long timeBetweenPresses = 100;
+	private ArrayList<Point> points;
+	private ArrayList<Point> predictedPoints;
+	private long lastPress;
 	private boolean editable;
 
 	public Panel(RepaintListener frame) {
 		super();
 		this.frame = frame;
+		points = new ArrayList<Point>();
+		predictedPoints = new ArrayList<Point>();
 		editable = true;
+		lastPress = 0;
 
 		setFocusable(true);
 		requestFocus();
@@ -34,8 +35,6 @@ public class Panel extends JPanel  {
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
@@ -64,27 +63,25 @@ public class Panel extends JPanel  {
 					type = Color.RED;
 				}
 
-				points.add(new Point(x,y, type));
+				points.add(new Point(type, x, y));
 				frame.repaint();
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-
 			}
 		});
+		
+		
+
 	}
 
 	public void paint(Graphics g) {
@@ -95,14 +92,14 @@ public class Panel extends JPanel  {
 		g.setColor(Color.BLACK);
 		g.drawRect(0, 0, DIMENSION, DIMENSION);
 		
-		for(Point p : determinedPoints) {
+		for(Point p : predictedPoints) {
 			g.setColor(p.getType());
-			g.fillRect(p.getX()-1, p.getY()-1, 2, 2);
+			g.fillRect((int) (p.getInput(0)-PREDICTED_SIZE/2),(int) (p.getInput(1)-PREDICTED_SIZE/2), PREDICTED_SIZE, PREDICTED_SIZE);
 		}
 		
 		for(Point p : points) {
 			g.setColor(p.getType());
-			g.fillRect(p.getX()-SIZE/2, p.getY()-SIZE/2, SIZE, SIZE);
+			g.fillRect((int) (p.getInput(0)-SIZE/2),(int) (p.getInput(1)-SIZE/2), SIZE, SIZE);
 		}
 	}
 
@@ -114,8 +111,12 @@ public class Panel extends JPanel  {
 		return points;
 	}
 
-	public void setDeterminedPoints(ArrayList<Point> determinedPoints) {
-		this.determinedPoints = determinedPoints;
+	public void setPoints(ArrayList<Point> points) {
+		this.points = points;
+	}
+	
+	public void setPredictedPoints(ArrayList<Point> predictedPoints) {
+		this.predictedPoints = predictedPoints;
 	}
 
 

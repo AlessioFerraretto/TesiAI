@@ -1,9 +1,14 @@
 package neuralNetwork;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-public class NeuralNetwork {
+public class NeuralNetwork implements Serializable {
 
 	private ArrayList<Neurone> inputLayer, outputLayer;
 	private ArrayList<ArrayList<Neurone>> layers;
@@ -57,11 +62,11 @@ public class NeuralNetwork {
 		//Connect layers
 		for(int i=0;i<layers.size()-1;i++) {
 			for(int j=0;j<layers.get(i).size();j++) {
-				
+
 				for (Neurone n : layers.get(i+1)) {
 					if(!(n instanceof NeuroneBias)) {
 						Arco a = new Arco(layers.get(i).get(j), n);
-						
+
 						layers.get(i).get(j).addNext(a);
 						n.addPrevious(a);
 					}
@@ -116,23 +121,21 @@ public class NeuralNetwork {
 		for (int i=0;i<outputLayer.size();i++) {
 			float actualOutput = outputLayer.get(i).getLastOutput();
 			float error = expectedOutputValues[i] - actualOutput;
-			float gradient = NeuralNetworkSettings.derivate(outputLayer.get(i).getActivationFunctionType(), actualOutput);
+			float gradient = NeuralNetworkSettings.derivate(outputLayer.get(i).getActivationFunctionType(), outputLayer.get(i).getLastOutputX());
+
 			outputLayer.get(i).setError(error * gradient);
 
 			for (Arco a : outputLayer.get(i).getPrevious()) {
 				float input = a.getFrom().getLastOutput();
-				float weightChange = NeuralNetworkSettings.DEFAULT_LEARNING_RATE * 
-						outputLayer.get(i).getError()
-						* input;
+				float weightChange = NeuralNetworkSettings.getLearningRate() * 
+						outputLayer.get(i).getError() * input;
 				a.updateWeight(weightChange);
-				
 			}
 		}
 
 		//Backpropagate through hidden layers
 		for (int i = layers.size() - 2; i > 0; i--) {
 			ArrayList<Neurone> currentLayer = layers.get(i);
-			ArrayList<Neurone> nextLayer = layers.get(i + 1);
 
 			for (Neurone neuron : currentLayer) {
 				//Calculate the error signal for this neuron
@@ -141,17 +144,48 @@ public class NeuralNetwork {
 					errorSum += a.getWeight() * a.getTo().getError();
 				}
 
-				float gradient = NeuralNetworkSettings.derivate(neuron.getActivationFunctionType(), neuron.getLastOutput());
+				float gradient = NeuralNetworkSettings.derivate(neuron.getActivationFunctionType(), neuron.getLastOutputX());
+
 				neuron.setError(errorSum * gradient);
 
 				// Update weights for this hidden neuron
 				for (Arco a : neuron.getPrevious()) {
 					float input = a.getFrom().getLastOutput();
-					float weightChange = NeuralNetworkSettings.DEFAULT_LEARNING_RATE * neuron.getError() * input;
+					float weightChange = NeuralNetworkSettings.getLearningRate() * 
+							neuron.getError() * input;
+
 					a.updateWeight(weightChange);
-					
+
 				}
 			}
+		}
+
+	}
+	
+	public static NeuralNetwork load(String f) {
+		NeuralNetwork nn = null;
+		try {
+			FileInputStream fin = new FileInputStream(f);
+			ObjectInputStream ois = new ObjectInputStream(fin);
+			nn = (NeuralNetwork) ois.readObject();
+			ois.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return nn;
+	}
+
+	public void save(String f) {
+		try {
+			FileOutputStream fout = new FileOutputStream(f, true);
+			ObjectOutputStream oos = new ObjectOutputStream(fout);
+			oos.writeObject(this);
+			oos.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 	}

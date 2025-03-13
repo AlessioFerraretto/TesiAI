@@ -7,14 +7,14 @@ import javax.swing.JPanel;
 public class ButtonPanel extends JPanel {
 
 	private Button run;
-	private RunListener frame;
-	public ButtonPanel(RunListener frame) {
+	private TrainListener frame;
+	public ButtonPanel(TrainListener frame) {
 		super();
 		this.frame = frame;
 		
 		setMaximumSize(new Dimension(1000,200));
-		run = new Button("Run");
-		run.addActionListener(l->frame.run());
+		run = new Button("Train");
+		run.addActionListener(e->frame.train());
 		add(run);
 
 	}

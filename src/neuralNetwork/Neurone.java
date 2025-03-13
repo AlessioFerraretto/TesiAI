@@ -1,15 +1,18 @@
 package neuralNetwork;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Neurone {
+import common.NumberController;
+
+public class Neurone implements Serializable {
 	public static int N = 0;
 	
 	private int id;
 	protected ActivationFunctionType activationFunctionType;
 	protected ArrayList<Arco> previous, next;
 
-	private float lastOutput, error;
+	private float lastOutputX, lastOutputY, error;
 
 	public Neurone(ActivationFunctionType activationFunctionType) {
 		this.activationFunctionType = activationFunctionType;
@@ -32,21 +35,26 @@ public class Neurone {
 		for(int i=0;i<previous.size();i++) {
 			f += previous.get(i).getWeight()*previous.get(i).getFrom().evaluate();
 		}
+
+		lastOutputX = f;
+		lastOutputY = NeuralNetworkSettings.activationFuncion(activationFunctionType, f);
 		
-		lastOutput = NeuralNetworkSettings.activationFuncion(activationFunctionType, f);
-		if(Float.isNaN(lastOutput)) {
-			System.out.println("b");
-			System.exit(0);
-		}
- 		return lastOutput;
+		lastOutputY = NumberController.check(lastOutputY, 4);
+ 		return lastOutputY;
 	}
 
-	public Float getLastOutput() {
-		return lastOutput;
+	public Float getLastOutputY() {
+		return lastOutputY;
 	}
 
+	public Float getLastOutputX() {
+		return lastOutputX;
+	}
+	
 	public void setError(float error) {
 		this.error = error;
+		
+		error = NumberController.check(error, 2);
 	}
 
 	public float getError() {
@@ -81,5 +89,8 @@ public class Neurone {
 		return id;
 	}
 
+	public Float getLastOutput() {
+		return getLastOutputY();
+	}
 
 }

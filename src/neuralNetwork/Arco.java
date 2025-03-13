@@ -1,21 +1,30 @@
 package neuralNetwork;
 
-public class Arco {
+import java.io.Serializable;
+
+import common.NumberController;
+import common.RandomSingleton;
+
+public class Arco implements Serializable {
 
 	public static int N = 0;
 	private int id;
 	
-	
 	private Neurone from, to;
-	float weight;
+	private float weight;
 
 	public Arco(Neurone from, Neurone to, float weight) {
 		this.from = from;
 		this.to = to;
-		this.weight = weight;
+		setWeight(weight);
 		
 		id = N;
 		N++;
+	}
+
+	private void setWeight(float w) {
+		weight = w;
+		weight = NumberController.check(weight, 1);
 	}
 
 	public Arco(Neurone from, Neurone to) {
@@ -27,14 +36,11 @@ public class Arco {
 	}
 
 	public float getWeight() {
-		if(Float.isNaN(weight)) {
-			System.out.println("m");
-		}
 		return weight;
 	}
 
 	public void updateWeight(float weightChange) {
-		weight+=weightChange;
+		setWeight(weight+weightChange);
 	}
 
 	public Neurone getTo() {

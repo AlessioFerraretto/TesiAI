@@ -2,14 +2,13 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import classification.Panel;
-import classification.Point;
+import common.RandomSingleton;
 import neuralNetwork.ActivationFunctionType;
 import neuralNetwork.Input;
 import neuralNetwork.InputType;
 import neuralNetwork.NeuralNetwork;
 import neuralNetwork.NeuralNetworkBuilder;
 import neuralNetwork.NeuralNetworkException;
-import neuralNetwork.RandomSingleton;
 
 public class test {
 	public static void main(String[] args) throws NeuralNetworkException {

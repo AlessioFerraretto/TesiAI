@@ -1,5 +1,8 @@
 package neuralNetwork;
-public class NeuroneBias extends Neurone {
+
+import java.io.Serializable;
+
+public class NeuroneBias extends Neurone implements Serializable  {
 
 	public NeuroneBias(ActivationFunctionType activationFunctionType) {
 		super(activationFunctionType);

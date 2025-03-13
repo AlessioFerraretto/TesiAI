@@ -1,5 +1,10 @@
 package neuralNetwork;
-public class NeuroneInput extends Neurone {
+
+import java.io.Serializable;
+
+import common.NumberController;
+
+public class NeuroneInput extends Neurone implements Serializable {
 
 	protected float value;
 
@@ -8,6 +13,8 @@ public class NeuroneInput extends Neurone {
 	}
 
 	public Float getValue() {
+		value = NumberController.check(value, 3);
+
 		return value;
 	}
 
@@ -15,7 +22,7 @@ public class NeuroneInput extends Neurone {
 		value = v;
 	}
 
-	protected Float evaluate() {
+	protected Float evaluate() {		
 		return getValue();
 	}
 

@@ -4,10 +4,12 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
+import common.Point;
 import neuralNetwork.ActivationFunctionType;
 import neuralNetwork.Input;
 import neuralNetwork.InputType;
@@ -16,9 +18,11 @@ import neuralNetwork.NeuralNetworkBuilder;
 import neuralNetwork.NeuralNetworkException;
 
 
-public class Frame extends JFrame implements RepaintListener, RunListener {
+public class Frame extends JFrame implements RepaintListener, TrainListener {
 
-	public static int WIDTH = Panel.DIMENSION + 150, HEIGHT = Panel.DIMENSION + 40;
+	
+	private static final int PREDICTED_POINTS_HIGHLIGHT = 1000, EPOCHS = 100000;
+	public static int WIDTH = Panel.DIMENSION + 150, HEIGHT = Panel.DIMENSION + 40, GRANULARITY=3;
 	private int x, y;
 	private Panel mainPanel;
 	private ButtonPanel buttonPanel;
@@ -46,13 +50,12 @@ public class Frame extends JFrame implements RepaintListener, RunListener {
 		add(buttonPanel);
 
 		setVisible(true);
-
-
+		
 		nn = NeuralNetworkBuilder.Builder()
 				.input(IN)
-				.hidden(2, ActivationFunctionType.HYPERBOLIC_TANGENT)
-				.hidden(2, ActivationFunctionType.HYPERBOLIC_TANGENT)
-				.output(OUT, ActivationFunctionType.SIGMOID)
+				.hidden(3, ActivationFunctionType.TANH)
+				.hidden(3, ActivationFunctionType.TANH)
+				.output(OUT, ActivationFunctionType.TANH)
 				.build();
 	}
 
@@ -62,9 +65,9 @@ public class Frame extends JFrame implements RepaintListener, RunListener {
 	}
 
 	@Override
-	public void run() {
+	public void train() {
 		mainPanel.setEditable(false);
-		int N = 10000;
+		int N = EPOCHS;
 		long startTime = System.currentTimeMillis();
 
 		try {
@@ -75,8 +78,8 @@ public class Frame extends JFrame implements RepaintListener, RunListener {
 				Float[] out = new Float[OUT];
 
 				for(int j=0;j<mainPanel.getPoints().size();j++) {
-					in[0] = new Input(mainPanel.getPoints().get(j).getX(), InputType.CLASSIFICATION);
-					in[1] = new Input(mainPanel.getPoints().get(j).getY(), InputType.CLASSIFICATION);
+					in[0] = new Input(mainPanel.getPoints().get(j).getInput(0), InputType.CLASSIFICATION);
+					in[1] = new Input(mainPanel.getPoints().get(j).getInput(1), InputType.CLASSIFICATION);
 
 					out[0] = mainPanel.getPoints().get(j).getType().equals(Color.RED) ? 1f : 0;
 					out[1] = mainPanel.getPoints().get(j).getType().equals(Color.BLUE) ? 1f : 0;
@@ -84,13 +87,16 @@ public class Frame extends JFrame implements RepaintListener, RunListener {
 					nn.test(in, out);
 				}
 
+				if(k%1000 == 0) {
 				printProgressBar(startTime, k, N);
+				}
 			}
+			System.out.println();
 
 			//evaluating
-			ArrayList<Point> determinedPoints = new ArrayList();
-			for(int x=0;x<Panel.DIMENSION;x++) {
-				for(int y=0;y<Panel.DIMENSION;y++) {
+			ArrayList<Point> determinedPoints = new ArrayList<Point>();
+			for(int x=0;x<Panel.DIMENSION;x+=GRANULARITY) {
+				for(int y=0;y<Panel.DIMENSION;y+=GRANULARITY) {
 					Input inX = new Input(x, InputType.CLASSIFICATION);
 					Input inY = new Input(y, InputType.CLASSIFICATION);
 
@@ -98,20 +104,22 @@ public class Frame extends JFrame implements RepaintListener, RunListener {
 
 					Color color;
 					if(out[0]>out[1]) {
-						int transp = Math.min((int) ((out[0]-out[1])*100),255);
-						color = new Color(255,120,120,Math.abs(transp));
+						int transp = Math.min((int) ((out[0]-out[1])*PREDICTED_POINTS_HIGHLIGHT),255);
+						color = new Color(255,0,0,Math.abs(transp));
 					} else {
-						int transp = Math.min((int) ((out[1]-out[0])*100),255);
-						color = new Color(120,120,255,Math.abs(transp));
+						int transp = Math.min((int) ((out[1]-out[0])*PREDICTED_POINTS_HIGHLIGHT),255);
+						color = new Color(0,0,255,Math.abs(transp));
 					}
-					determinedPoints.add(new Point(x,y,color));
+					determinedPoints.add(new Point(color,x,y));
 				}
 			}
-
-			mainPanel.setDeterminedPoints(determinedPoints);
+			System.out.println("done");
+			mainPanel.setPredictedPoints(determinedPoints);
 
 			mainPanel.setEditable(true);
 			repaint();
+			System.out.println("repainted");
+
 
 		} catch (NeuralNetworkException e) {
 			e.printStackTrace();
@@ -148,6 +156,5 @@ public class Frame extends JFrame implements RepaintListener, RunListener {
 		System.out.print("\033[F");  // Move cursor up one line
 		System.out.print("\033[2K"); // Clear the entire line
 	}
-
 
 }

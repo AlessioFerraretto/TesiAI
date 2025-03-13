@@ -1,16 +1,20 @@
-package neuralNetwork;
+package common;
 import java.util.Random;
 
 public class RandomSingleton {
 
-	private final static long SEED = 0;
+	private final static long SEED = 1;
 	private RandomSingleton() {}
 	
 	private static Random r;
 	
 	static {
+		setSeed(SEED);
+	}
+	
+	public static void setSeed(long seed) {
 		 r = new Random();
-		 r.setSeed(SEED);
+		 r.setSeed(seed);
 	}
 	
 	public static double random() {
@@ -28,6 +32,10 @@ public class RandomSingleton {
 
 	public static boolean randBool() {
 		return r.nextDouble()>0.5;
+	}
+
+	public static int randInt(int from, int to) {
+		return r.nextInt(from, to);
 	}
 
 }
