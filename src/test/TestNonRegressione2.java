@@ -26,17 +26,18 @@ import neuralNetwork.NeuralNetworkSettings;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @RunWith(JUnit4.class)
-class TestNonRegressioneWithLimit {
+class TestNonRegressione2 {
 
 	private static final int TEST_EPOCHS = 15000, TEST_SEED = 1;
 	private static final Float TEST_LEARNING_RATE = 0.02f;
-	private static final boolean TEST_CALCULATE_DERIVATE_NUMERICALLY = true;
+	private static final boolean TEST_CALCULATE_DERIVATE_NUMERICALLY = true, TEST_USE_INERTIA = false;;
 
 	@BeforeAll
 	static void setup() {
 		RandomSingleton.setSeed(TEST_SEED);
 		NeuralNetworkSettings.setLearningRate(TEST_LEARNING_RATE);
 		NeuralNetworkSettings.setCalculateDerivateNumerically(TEST_CALCULATE_DERIVATE_NUMERICALLY);
+		NeuralNetworkSettings.setUseInertia(TEST_USE_INERTIA);
 	}
 
 	@Test

@@ -120,15 +120,18 @@ public class NeuralNetwork implements Serializable {
 
 		for (int i=0;i<outputLayer.size();i++) {
 			float actualOutput = outputLayer.get(i).getLastOutput();
-			float error = expectedOutputValues[i] - actualOutput;
+			float error = actualOutput - expectedOutputValues[i];
 			float gradient = NeuralNetworkSettings.derivate(outputLayer.get(i).getActivationFunctionType(), outputLayer.get(i).getLastOutputX());
 
 			outputLayer.get(i).setError(error * gradient);
 
 			for (Arco a : outputLayer.get(i).getPrevious()) {
 				float input = a.getFrom().getLastOutput();
-				float weightChange = NeuralNetworkSettings.getLearningRate() * 
+				float weightChange = - NeuralNetworkSettings.getLearningRate() * 
 						outputLayer.get(i).getError() * input;
+				if(NeuralNetworkSettings.getUseInertia()) {
+					weightChange += NeuralNetworkSettings.getAlpha() * a.getPreviousWeightChange();
+				}
 				a.updateWeight(weightChange);
 			}
 		}
@@ -151,8 +154,11 @@ public class NeuralNetwork implements Serializable {
 				// Update weights for this hidden neuron
 				for (Arco a : neuron.getPrevious()) {
 					float input = a.getFrom().getLastOutput();
-					float weightChange = NeuralNetworkSettings.getLearningRate() * 
+					float weightChange = - NeuralNetworkSettings.getLearningRate() * 
 							neuron.getError() * input;
+					if(NeuralNetworkSettings.getUseInertia()) {
+						weightChange += NeuralNetworkSettings.getAlpha() * a.getPreviousWeightChange();
+					}
 
 					a.updateWeight(weightChange);
 
@@ -161,7 +167,7 @@ public class NeuralNetwork implements Serializable {
 		}
 
 	}
-	
+
 	public static NeuralNetwork load(String f) {
 		NeuralNetwork nn = null;
 		try {
@@ -173,7 +179,7 @@ public class NeuralNetwork implements Serializable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return nn;
 	}
 

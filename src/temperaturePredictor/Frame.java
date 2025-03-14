@@ -23,6 +23,10 @@ public class Frame extends JFrame {
 			WIDTH = Panel.DIMENSION + 17 + PADDING*2, //
 			HEIGHT = Panel.DIMENSION + 40 + PADDING*2, 
 			GRANULARITY=10;
+	
+	private static final int EPOCHS = 1000;
+
+	
 	private Panel mainPanel;
 	private static String FILE_SAVE = "save", FILE_EXTENSION = ".dat"; 
 	
@@ -61,7 +65,7 @@ public class Frame extends JFrame {
 
 		setVisible(true);
 
-		nn = NeuralNetwork.load(FILE_SAVE + FILE_EXTENSION);
+//		nn = NeuralNetwork.load(FILE_SAVE + FILE_EXTENSION);
 
 		if(nn == null) {
 			nn = NeuralNetworkBuilder.Builder()
@@ -73,7 +77,7 @@ public class Frame extends JFrame {
 
 			train();
 			
-			nn.save(FILE_SAVE + FILE_EXTENSION);
+//			nn.save(FILE_SAVE + FILE_EXTENSION);
 
 
 		}
@@ -88,7 +92,7 @@ public class Frame extends JFrame {
 	}
 
 	public void train() {
-		int N = 10000;
+		int N = EPOCHS;
 		long startTime = System.currentTimeMillis();
 
 		//training 

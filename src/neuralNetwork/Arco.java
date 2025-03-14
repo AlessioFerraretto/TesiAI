@@ -11,7 +11,7 @@ public class Arco implements Serializable {
 	private int id;
 	
 	private Neurone from, to;
-	private float weight;
+	private float weight, previousWeightChange;
 
 	public Arco(Neurone from, Neurone to, float weight) {
 		this.from = from;
@@ -40,6 +40,7 @@ public class Arco implements Serializable {
 	}
 
 	public void updateWeight(float weightChange) {
+		previousWeightChange = weightChange;
 		setWeight(weight+weightChange);
 	}
 
@@ -49,5 +50,9 @@ public class Arco implements Serializable {
 
 	public String toString() {
 		return "Arco id: "+id+ " from " + from.getId() + " to " + to.getId();
+	}
+
+	public Float getPreviousWeightChange() {
+		return previousWeightChange;
 	}
 }

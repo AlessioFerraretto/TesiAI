@@ -6,9 +6,11 @@ public class NeuralNetworkSettings {
 
 	public final static Float DEFAULT_LEARNING_RATE = 0.01f, EPSILON = 1e-4f;
 	public final static boolean DEFAULT_CALCULATE_DERIVATE_NUMERICALY = false;
-
-	public static boolean calculateDerivateNumerically = DEFAULT_CALCULATE_DERIVATE_NUMERICALY;
-	public static Float learningRate = DEFAULT_LEARNING_RATE;
+	public static final boolean DEFAULT_USE_INTERTIA = true;
+	public static final Float DEFAULT_ALPHA = 0.93f;
+	
+	private static boolean calculateDerivateNumerically = DEFAULT_CALCULATE_DERIVATE_NUMERICALY, useInertia = DEFAULT_USE_INTERTIA;
+	private static Float learningRate = DEFAULT_LEARNING_RATE, alpha = DEFAULT_ALPHA;
 	
 	public static Float activationFuncion(ActivationFunctionType type, float x) {
 		switch(type) {
@@ -167,6 +169,22 @@ public class NeuralNetworkSettings {
 
 	public static boolean getCalculateDerivateNumerically() {
 		return calculateDerivateNumerically;
+	}
+
+	public static boolean getUseInertia() {
+		return useInertia;
+	}
+
+	public static Float getAlpha() {
+		return alpha;
+	}
+
+	public static void setUseInertia(boolean b) {
+		useInertia = b;
+	}
+
+	public static void setAlpha(float f) {
+		alpha = f;
 	}
 
 	//if a project contains multiple NeuralNetwork, each one with its own Settings, use this.
