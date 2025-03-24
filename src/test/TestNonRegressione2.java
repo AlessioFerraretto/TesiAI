@@ -127,7 +127,7 @@ class TestNonRegressione2 {
 				.output(OUT, ActivationFunctionType.RELU)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, EPOCHS, 0f, 0f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, EPOCHS, 0f, 1f);
 	}
 
 

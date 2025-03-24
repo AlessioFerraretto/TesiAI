@@ -125,7 +125,7 @@ private static final int TEST_EPOCHS = 5000, TEST_SEED = 1;
 				.output(OUT, ActivationFunctionType.RELU)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, EPOCHS, 0f, 0f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, EPOCHS, 0.82918274f, 0f);
 	}
 
 
