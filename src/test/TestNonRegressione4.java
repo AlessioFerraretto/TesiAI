@@ -114,23 +114,6 @@ class TestNonRegressione4 {
 		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, -0.17206877f, 0.99987316f);
 	}
 
-
-	@Test
-	@Order(5)
-	void testLinear() {
-		int IN = 2, OUT = 2;
-
-		NeuralNetwork nn = NeuralNetworkBuilder.Builder()
-				.input(IN)
-				.hidden(3, ActivationFunctionType.LINEAR)
-				.hidden(3, ActivationFunctionType.LINEAR)
-				.output(OUT, ActivationFunctionType.LINEAR)
-				.build();
-
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0f, 0.40723327f);
-	}
-
-
 	@Test
 	@Order(6)
 	void testRelu() {

@@ -15,8 +15,6 @@ public class NeuralNetworkSettings {
 		switch(type) {
 		case TANH:
 			return hyperbolicTangentActivationFunction(x);
-		case LINEAR:
-			return linearActivationFunction(x);
 		case BIPOLAR_STEP:
 			return bipolarStepActivationFunction(x);
 		case SIGMOID:
@@ -38,11 +36,6 @@ public class NeuralNetworkSettings {
 				return (hyperbolicTangentActivationFunction(x+EPSILON)-hyperbolicTangentActivationFunction(x))/EPSILON;
 			else 
 				return hyperbolicTangentDerivate(x);
-		case LINEAR:
-			if(getCalculateDerivateNumerically())
-				return (linearActivationFunction(x+EPSILON)-linearActivationFunction(x))/EPSILON;
-			else
-				return linearDerivate(x);
 		case BIPOLAR_STEP:
 			if(getCalculateDerivateNumerically())
 				return (bipolarStepActivationFunction(x+EPSILON)-bipolarStepActivationFunction(x))/EPSILON;
@@ -66,23 +59,6 @@ public class NeuralNetworkSettings {
 		}
 
 		return null;
-	}
-
-	//Linear
-	private static Float linearActivationFunction(float x) {
-		if(x>0) {
-			return x;
-		} else {
-			return 0f;
-		}
-	}
-
-	private static Float linearDerivate(float x) {
-		if(x>0) {
-			return 1f;
-		} else {
-			return 0f;
-		}	
 	}
 
 	//BipolarStep

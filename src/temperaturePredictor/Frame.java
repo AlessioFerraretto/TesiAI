@@ -71,8 +71,8 @@ public class Frame extends JFrame {
 		if(nn == null) {
 			nn = NeuralNetworkBuilder.Builder()
 					.input(IN)
-					.hidden(5, ActivationFunctionType.RELU)
-					.hidden(5, ActivationFunctionType.RELU)
+					.hidden(5, ActivationFunctionType.GELU)
+					.hidden(5, ActivationFunctionType.GELU)
 					.output(OUT, ActivationFunctionType.SIGMOID)
 					.build();
 			

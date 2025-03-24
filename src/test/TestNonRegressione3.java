@@ -113,23 +113,6 @@ private static final int TEST_EPOCHS = 5000, TEST_SEED = 1;
 		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.7298906f, 0.99522424f);
 	}
 
-
-	@Test
-	@Order(5)
-	void testLinear() {
-		int IN = 2, OUT = 2;
-
-		NeuralNetwork nn = NeuralNetworkBuilder.Builder()
-				.input(IN)
-				.hidden(3, ActivationFunctionType.LINEAR)
-				.hidden(3, ActivationFunctionType.LINEAR)
-				.output(OUT, ActivationFunctionType.LINEAR)
-				.build();
-
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.82918274f, 0f);
-	}
-
-
 	@Test
 	@Order(6)
 	void testRelu() {
