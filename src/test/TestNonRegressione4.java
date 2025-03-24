@@ -26,20 +26,20 @@ import neuralNetwork.NeuralNetworkSettings;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @RunWith(JUnit4.class)
-class TestNonRegressione1 {
+class TestNonRegressione4 {
 
-	private static final int TEST_EPOCHS = 10000, TEST_SEED = 0;
-
+	private static final int TEST_EPOCHS = 10000, TEST_SEED = 1;
+	
 	private static final Float 
 	TEST_LEARNING_RATE = NeuralNetworkSettings.DEFAULT_LEARNING_RATE,
-	TEST_ALPHA = NeuralNetworkSettings.DEFAULT_ALPHA,
-	TEST_DROPOUT_RATE = NeuralNetworkSettings.DEFAULT_DROPOUT_RATE;
-
-
+			TEST_ALPHA = NeuralNetworkSettings.DEFAULT_ALPHA,
+			TEST_DROPOUT_RATE = 0.02f/100;
+	
+	
 	private static final boolean 
 	TEST_CALCULATE_DERIVATE_NUMERICALLY = NeuralNetworkSettings.DEFAULT_CALCULATE_DERIVATE_NUMERICALY,
-	TEST_USE_INERTIA = false,
-	TEST_USE_DROPOUT = NeuralNetworkSettings.DEFAULT_USE_DROPOUT;
+	TEST_USE_INERTIA = NeuralNetworkSettings.DEFAULT_USE_INTERTIA,
+	TEST_USE_DROPOUT = true;
 
 	@BeforeAll
 	static void setup() {
@@ -51,7 +51,6 @@ class TestNonRegressione1 {
 		NeuralNetworkSettings.setUseDropout(TEST_USE_DROPOUT);
 		NeuralNetworkSettings.setDropoutRate(TEST_DROPOUT_RATE);
 	}
-
 
 	@Test
 	@Order(1)
@@ -65,7 +64,7 @@ class TestNonRegressione1 {
 				.output(OUT, ActivationFunctionType.SIGMOID)
 				.build();
 
-		trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.1524454f, 0.8479387f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.9989032f, 0.0011601417f);
 	}
 
 
@@ -81,7 +80,7 @@ class TestNonRegressione1 {
 				.output(OUT, ActivationFunctionType.BIPOLAR_STEP)
 				.build();
 
-		trainNeuralNetwork(nn, IN, TEST_EPOCHS, -1f, 1f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 1f, -1f);
 
 	}
 
@@ -97,7 +96,7 @@ class TestNonRegressione1 {
 				.output(OUT, ActivationFunctionType.GELU)
 				.build();
 
-		trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.982507f, 0.03504354f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.65702367f, 0.33645245f);
 	}
 
 	@Test
@@ -112,7 +111,7 @@ class TestNonRegressione1 {
 				.output(OUT, ActivationFunctionType.TANH)
 				.build();
 
-		trainNeuralNetwork(nn, IN, TEST_EPOCHS, -0.27816874f, 0.97614646f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, -0.17206877f, 0.99987316f);
 	}
 
 
@@ -128,7 +127,7 @@ class TestNonRegressione1 {
 				.output(OUT, ActivationFunctionType.LINEAR)
 				.build();
 
-		trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0f, 0f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0f, 0.40723327f);
 	}
 
 
@@ -144,51 +143,9 @@ class TestNonRegressione1 {
 				.output(OUT, ActivationFunctionType.RELU)
 				.build();
 
-		trainNeuralNetwork(nn, IN, EPOCHS, 0.5217011f, 0.47836763f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, EPOCHS, 0f, 0f);
 	}
 
-
-	static void trainNeuralNetwork(NeuralNetwork nn, int IN, int EPOCHS, Float... outputs) {
-		int OUT = 2;
-
-		ArrayList<Point> points = new ArrayList<>();
-		for (int i=0;i<10;i++) {
-			points.add(Point.generateRandomPoint(2));
-		}
-
-		//testing 
-		for(int k=0;k<EPOCHS;k++) {
-			Input[] in = new Input[IN];
-			Float[] out = new Float[OUT];
-
-			for(int j=0;j<points.size();j++) {
-				for (int i=0;i<IN;i++) {
-					in[i] = new Input(points.get(j).getInput(i), InputType.CLASSIFICATION);
-
-				}
-				out[0] = points.get(j).getType().equals(Color.RED) ? 1f : 0;
-				out[1] = points.get(j).getType().equals(Color.BLUE) ? 1f : 0;
-
-				try {
-					nn.train(in, out);
-				} catch (NeuralNetworkException e) {
-					e.printStackTrace();
-				}
-			}
-
-		}
-
-		Float[] results = null;
-		try {
-			results = nn.feedForward(new Input[] { new Input(0, InputType.CLASSIFICATION), new Input(0, InputType.CLASSIFICATION) });
-		} catch (NeuralNetworkException e) {
-			e.printStackTrace();
-		}
-
-		for(int i=0;i<OUT;i++) {
-			assertEquals(outputs[i], results[i]);
-		}
-	}
 
 
 }

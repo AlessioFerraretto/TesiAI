@@ -29,8 +29,17 @@ import neuralNetwork.NeuralNetworkSettings;
 class TestNonRegressione2 {
 
 	private static final int TEST_EPOCHS = 15000, TEST_SEED = 1;
-	private static final Float TEST_LEARNING_RATE = 0.02f;
-	private static final boolean TEST_CALCULATE_DERIVATE_NUMERICALLY = true, TEST_USE_INERTIA = false;;
+
+	private static final Float 
+	TEST_LEARNING_RATE = 0.02f,
+	TEST_ALPHA = NeuralNetworkSettings.DEFAULT_ALPHA,
+	TEST_DROPOUT_RATE = NeuralNetworkSettings.DEFAULT_DROPOUT_RATE;
+
+
+	private static final boolean 
+	TEST_CALCULATE_DERIVATE_NUMERICALLY = true,
+	TEST_USE_INERTIA = false,
+	TEST_USE_DROPOUT = NeuralNetworkSettings.DEFAULT_USE_DROPOUT;
 
 	@BeforeAll
 	static void setup() {
@@ -38,8 +47,12 @@ class TestNonRegressione2 {
 		NeuralNetworkSettings.setLearningRate(TEST_LEARNING_RATE);
 		NeuralNetworkSettings.setCalculateDerivateNumerically(TEST_CALCULATE_DERIVATE_NUMERICALLY);
 		NeuralNetworkSettings.setUseInertia(TEST_USE_INERTIA);
+		NeuralNetworkSettings.setAlpha(TEST_ALPHA);
+		NeuralNetworkSettings.setUseDropout(TEST_USE_DROPOUT);
+		NeuralNetworkSettings.setDropoutRate(TEST_DROPOUT_RATE);
 	}
 
+	
 	@Test
 	@Order(1)
 	void testSigmoid() {
@@ -115,7 +128,7 @@ class TestNonRegressione2 {
 				.output(OUT, ActivationFunctionType.LINEAR)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, -1f, 1f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0f, 1f);
 	}
 
 

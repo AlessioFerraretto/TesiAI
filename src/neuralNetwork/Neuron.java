@@ -38,24 +38,24 @@ public class Neuron implements Serializable {
 			return 0f;
 		}
 		
-		float f = 0;
+		float sum = 0;
 		for(int i=0;i<previous.size();i++) {
-			f += previous.get(i).getWeight()*previous.get(i).getFrom().evaluate();
+			sum += previous.get(i).getWeight()*previous.get(i).getFrom().evaluate();
 		}
 
-		lastOutputX = f;
-		lastOutputY = NeuralNetworkSettings.activationFuncion(activationFunctionType, f);
+		lastOutputX = sum;
+		lastOutputY = NeuralNetworkSettings.activationFunction(activationFunctionType, sum);
 		
 		lastOutputY = NumberController.check(lastOutputY, 4);
 		
-		if(dropout) {
+		if(dropout) 	 {
 		    lastOutputY *= 1 / (1 - NeuralNetworkSettings.getDropoutRate());  // Scala l'output per compensare il dropout nel training
 		}
 		
  		return lastOutputY;
 	}
 
-	public Float getLastOutputY() {
+	private Float getLastOutputY() {
 		return lastOutputY;
 	}
 

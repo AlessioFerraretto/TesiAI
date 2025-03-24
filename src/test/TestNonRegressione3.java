@@ -28,9 +28,18 @@ import neuralNetwork.NeuralNetworkSettings;
 @RunWith(JUnit4.class)
 class TestNonRegressione3 {
 
-	private static final int TEST_EPOCHS = 15000, TEST_SEED = 1;
-	private static final Float TEST_LEARNING_RATE = 0.02f, TEST_ALPHA = 0.9f;
-	private static final boolean TEST_CALCULATE_DERIVATE_NUMERICALLY = true, TEST_USE_INERTIA = false;;
+private static final int TEST_EPOCHS = 5000, TEST_SEED = 1;
+	
+	private static final Float 
+	TEST_LEARNING_RATE = 0.02f,
+			TEST_ALPHA = 0.9f,
+			TEST_DROPOUT_RATE = NeuralNetworkSettings.DEFAULT_DROPOUT_RATE;
+	
+	
+	private static final boolean 
+	TEST_CALCULATE_DERIVATE_NUMERICALLY = true,
+	TEST_USE_INERTIA = true,
+	TEST_USE_DROPOUT = true;
 
 	@BeforeAll
 	static void setup() {
@@ -39,10 +48,9 @@ class TestNonRegressione3 {
 		NeuralNetworkSettings.setCalculateDerivateNumerically(TEST_CALCULATE_DERIVATE_NUMERICALLY);
 		NeuralNetworkSettings.setUseInertia(TEST_USE_INERTIA);
 		NeuralNetworkSettings.setAlpha(TEST_ALPHA);
-		
-		//Fixme
+		NeuralNetworkSettings.setUseDropout(TEST_USE_DROPOUT);
+		NeuralNetworkSettings.setDropoutRate(TEST_DROPOUT_RATE);
 	}
-
 	@Test
 	@Order(1)
 	void testSigmoid() {
@@ -55,7 +63,7 @@ class TestNonRegressione3 {
 				.output(OUT, ActivationFunctionType.SIGMOID)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.997042f, 0.003229596f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.99839514f, 0.0017123626f);
 	}
 
 
@@ -71,7 +79,7 @@ class TestNonRegressione3 {
 				.output(OUT, ActivationFunctionType.BIPOLAR_STEP)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 1f, -1f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, -1f, 1f);
 
 	}
 
@@ -87,7 +95,7 @@ class TestNonRegressione3 {
 				.output(OUT, ActivationFunctionType.GELU)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, -4.6248664E-15f, -0f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.7141436f, -1.4383781E-5f);
 	}
 
 	@Test
@@ -102,7 +110,7 @@ class TestNonRegressione3 {
 				.output(OUT, ActivationFunctionType.TANH)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.8407494f, 0.8385899f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.7298906f, 0.99522424f);
 	}
 
 
@@ -118,7 +126,7 @@ class TestNonRegressione3 {
 				.output(OUT, ActivationFunctionType.LINEAR)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, -1f, 1f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.82918274f, 0f);
 	}
 
 

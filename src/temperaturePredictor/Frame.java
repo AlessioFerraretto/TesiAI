@@ -71,22 +71,18 @@ public class Frame extends JFrame {
 		if(nn == null) {
 			nn = NeuralNetworkBuilder.Builder()
 					.input(IN)
-					.hidden(4, ActivationFunctionType.GELU)
-					.hidden(4, ActivationFunctionType.GELU)
+					.hidden(5, ActivationFunctionType.RELU)
+					.hidden(5, ActivationFunctionType.RELU)
 					.output(OUT, ActivationFunctionType.SIGMOID)
 					.build();
 			
 			train();
-			evaluate();
-			EPOCHS = 1000;
-			NeuralNetworkSettings.setDropout(true);
-			train();
+			feedForwardAndPaint();
 			
 //			nn.save(FILE_SAVE + FILE_EXTENSION);
 
 		}
 
-		evaluate();
 
 	}
 
@@ -103,14 +99,14 @@ public class Frame extends JFrame {
 		for(int k=0;k<N;k++) {
 			Input[] in = new Input[IN];
 			Float[] out = new Float[OUT];
+			Float[] predicted = null;
 
 			for(int j=0;j<mainPanel.getTemps().size();j++) {
 				in[0] = new Input(mainPanel.getTemps().get(j).getTime(), InputType.CLASSIFICATION);
-
 				out[0] = (mainPanel.getTemps().get(j).getValue()-Temperature.MIN_TEMP)/(Temperature.MAX_TEMP-Temperature.MIN_TEMP);
-
+				
 				try {
-					nn.train(in, out);
+					predicted = nn.train(in, out);
 				} catch (NeuralNetworkException e) {
 					e.printStackTrace();
 				}
@@ -118,14 +114,19 @@ public class Frame extends JFrame {
 
 			if(k%100 == 0) {
 				printProgressBar(startTime, k, N);
+				
+				feedForwardAndPaint();
+				
+				float mae = NeuralNetwork.calculateMAE(out, predicted);
+				float mse = NeuralNetwork.calculateMSE(out, predicted);
+				System.out.print(String.format("\nMAE: %.8f\tMSE: %.8f", mae, mse));
+
 			}
 		}
-		System.out.println();
 
 	}
 
-	public void evaluate() {
-		//evaluating
+	public void feedForwardAndPaint() {
 		ArrayList<Temperature> predictedTemps = new ArrayList<Temperature>();
 		for(int time=0;time<Temperature.MAX_TIME;time+=GRANULARITY) {
 			Input inTime = new Input(time, InputType.CLASSIFICATION);
@@ -139,11 +140,9 @@ public class Frame extends JFrame {
 
 			predictedTemps.add(new Temperature(time, (out[0]*(Temperature.MAX_TEMP-Temperature.MIN_TEMP)) + Temperature.MIN_TEMP));
 		}
-		System.out.println("done");
 		mainPanel.setPredictedTemps(predictedTemps);
 
 		repaint();
-		System.out.println("repainted");
 	}
 
 	private void printProgressBar(long startTime, int i, long total) {

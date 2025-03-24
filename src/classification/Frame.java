@@ -53,8 +53,8 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 		
 		nn = NeuralNetworkBuilder.Builder()
 				.input(IN)
-				.hidden(3, ActivationFunctionType.SIGMOID)
-				.hidden(3, ActivationFunctionType.SIGMOID)
+				.hidden(5, ActivationFunctionType.GELU)
+				.hidden(5, ActivationFunctionType.GELU)
 				.output(OUT, ActivationFunctionType.SIGMOID)
 				.build();
 	}

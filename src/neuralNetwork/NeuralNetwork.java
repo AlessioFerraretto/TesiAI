@@ -100,7 +100,7 @@ public class NeuralNetwork implements Serializable {
 	}
 
 	public Float[] feedForward(boolean train, Input... inputValues) throws NeuralNetworkException {
-		dropout(train && NeuralNetworkSettings.getDropout());
+		dropout(train && NeuralNetworkSettings.getUseDropout());
 
 		if(inputValues.length!=inputLayer.size()-1) {
 			throw new NeuralNetworkException("Input length mismatch");
@@ -118,17 +118,20 @@ public class NeuralNetwork implements Serializable {
 	}
 
 
-	public void train(ArrayList<Input> inputValues, ArrayList<Float> expectedOutputValues) throws NeuralNetworkException {
-		train((Input[]) inputValues.toArray(),(Float[]) expectedOutputValues.toArray());
+	public Float[] train(ArrayList<Input> inputValues, ArrayList<Float> expectedOutputValues) throws NeuralNetworkException {
+		return train((Input[]) inputValues.toArray(),(Float[]) expectedOutputValues.toArray());
 	}
 
-	public void train(Input[] inputValues, Float[] expectedOutputValues) throws NeuralNetworkException {
+	public Float[] train(Input[] inputValues, Float[] expectedOutputValues) throws NeuralNetworkException {
 
 		feedForward(true, inputValues);
 
+		Float[] predicted = new Float[expectedOutputValues.length];
+		
 		for (int i=0;i<outputLayer.size();i++) {
-			float actualOutput = outputLayer.get(i).getLastOutput();
-			float error = actualOutput - expectedOutputValues[i];
+			predicted[i] = outputLayer.get(i).getLastOutput();
+			float predictedOutput = outputLayer.get(i).getLastOutput();
+			float error = predictedOutput - expectedOutputValues[i];
 			float gradient = NeuralNetworkSettings.derivate(outputLayer.get(i).getActivationFunctionType(), outputLayer.get(i).getLastOutputX());
 
 			outputLayer.get(i).setError(error * gradient);
@@ -173,6 +176,9 @@ public class NeuralNetwork implements Serializable {
 				}
 			}
 		}
+		
+		return predicted;
+
 	}
 
 	private void dropout(boolean enable) {
@@ -183,6 +189,22 @@ public class NeuralNetwork implements Serializable {
 		}
 	}
 	
+    public static Float calculateMSE(Float[] actual, Float[] predicted) {
+    	Float mse = 0f;
+        for (int i = 0; i < actual.length; i++) {
+            mse += (float) Math.pow(actual[i] - predicted[i], 2);
+        }
+        return mse / actual.length;
+    }
+
+    public static Float calculateMAE(Float[] actual, Float[] predicted) {
+    	Float mae = 0f;
+        for (int i = 0; i < actual.length; i++) {
+            mae += Math.abs(actual[i] - predicted[i]);
+        }
+        return mae / actual.length;
+    }
+
 	public static NeuralNetwork load(String f) {
 		NeuralNetwork nn = null;
 		try {
