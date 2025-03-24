@@ -5,6 +5,9 @@ import classification.Panel;
 public enum InputType {
 
 	CLASSIFICATION(0,Panel.DIMENSION),
+
+	TEMPERATURA(0,50),
+	UMIDITA(0,100),
 	XOR(0,1);
 	
 	private float minValue, maxValue;

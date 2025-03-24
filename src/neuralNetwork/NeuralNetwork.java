@@ -4,14 +4,15 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import common.RandomSingleton;
+
 public class NeuralNetwork implements Serializable {
 
-	private ArrayList<Neurone> inputLayer, outputLayer;
-	private ArrayList<ArrayList<Neurone>> layers;
+	private ArrayList<Neuron> inputLayer, outputLayer;
+	private ArrayList<ArrayList<Neuron>> layers;
 
 	/**
 	 * @param input: input size
@@ -35,14 +36,14 @@ public class NeuralNetwork implements Serializable {
 
 		inputLayer = new ArrayList<>();
 		outputLayer = new ArrayList<>();
-		layers = new ArrayList<ArrayList<Neurone>>();
+		layers = new ArrayList<ArrayList<Neuron>>();
 
 		//Create inputLayers
 		for (int i=0;i<input;i++) {
-			Neurone n = new NeuroneInput();
+			Neuron n = new NeuronInput();
 			inputLayer.add(n);
 		}
-		Neurone bias = new NeuroneBias(hidden.get(0).getActivationFunctionType());
+		Neuron bias = new NeuronBias(hidden.get(0).getActivationFunctionType());
 		inputLayer.add(bias);
 
 		layers.add(inputLayer);
@@ -54,7 +55,7 @@ public class NeuralNetwork implements Serializable {
 
 		//Create outputLayers
 		for (int i=0;i<output.getSize();i++) {
-			NeuroneOutput n = new NeuroneOutput(output.getActivationFunctionType());
+			NeuronOutput n = new NeuronOutput(output.getActivationFunctionType());
 			outputLayer.add(n);
 		}
 		layers.add(outputLayer);
@@ -63,9 +64,9 @@ public class NeuralNetwork implements Serializable {
 		for(int i=0;i<layers.size()-1;i++) {
 			for(int j=0;j<layers.get(i).size();j++) {
 
-				for (Neurone n : layers.get(i+1)) {
-					if(!(n instanceof NeuroneBias)) {
-						Arco a = new Arco(layers.get(i).get(j), n);
+				for (Neuron n : layers.get(i+1)) {
+					if(!(n instanceof NeuronBias)) {
+						Connection a = new Connection(layers.get(i).get(j), n);
 
 						layers.get(i).get(j).addNext(a);
 						n.addPrevious(a);
@@ -74,33 +75,38 @@ public class NeuralNetwork implements Serializable {
 
 			}
 		}
-
 	}
 
-	private ArrayList<Neurone> addLayer(int layerSize, ActivationFunctionType hiddenActivationFunction) {
-		ArrayList<Neurone> hiddenLayer = new ArrayList<Neurone>();
+	private ArrayList<Neuron> addLayer(int layerSize, ActivationFunctionType hiddenActivationFunction) {
+		ArrayList<Neuron> hiddenLayer = new ArrayList<Neuron>();
 		//Create hidden layer
 		for (int i=0;i<layerSize;i++) {
-			Neurone n =  new Neurone(hiddenActivationFunction);
+			Neuron n =  new Neuron(hiddenActivationFunction);
 			hiddenLayer.add(n);
 		}
 		//Add Neurone Bias
-		Neurone bias = new NeuroneBias(hiddenActivationFunction);
+		Neuron bias = new NeuronBias(hiddenActivationFunction);
 		hiddenLayer.add(bias);
 
 		return hiddenLayer;
 	}
 
-	public Float[] evaluate(ArrayList<Input> inputValues) throws NeuralNetworkException {
-		return evaluate((Input[]) inputValues.toArray());
+	public Float[] feedForward(Input... inputValues) throws NeuralNetworkException {
+		return feedForward(false, inputValues);
+	}
+	
+	public Float[] feedForward(boolean train, ArrayList<Input> inputValues) throws NeuralNetworkException {
+		return feedForward(train, (Input[]) inputValues.toArray());
 	}
 
-	public Float[] evaluate(Input... inputValues) throws NeuralNetworkException {
+	public Float[] feedForward(boolean train, Input... inputValues) throws NeuralNetworkException {
+		dropout(train && NeuralNetworkSettings.getDropout());
+
 		if(inputValues.length!=inputLayer.size()-1) {
 			throw new NeuralNetworkException("Input length mismatch");
 		}
 		for(int i=0;i<inputLayer.size()-1;i++) {
-			((NeuroneInput) inputLayer.get(i)).setValue(inputValues[i].getValue());
+			((NeuronInput) inputLayer.get(i)).setValue(inputValues[i].getValue());
 		}
 
 		Float[] result = new Float[outputLayer.size()];
@@ -111,12 +117,14 @@ public class NeuralNetwork implements Serializable {
 		return result;
 	}
 
-	public void test(ArrayList<Input> inputValues, ArrayList<Float> expectedOutputValues) throws NeuralNetworkException {
-		test((Input[]) inputValues.toArray(),(Float[]) expectedOutputValues.toArray());
+
+	public void train(ArrayList<Input> inputValues, ArrayList<Float> expectedOutputValues) throws NeuralNetworkException {
+		train((Input[]) inputValues.toArray(),(Float[]) expectedOutputValues.toArray());
 	}
 
-	public void test(Input[] inputValues, Float[] expectedOutputValues) throws NeuralNetworkException {
-		evaluate(inputValues);
+	public void train(Input[] inputValues, Float[] expectedOutputValues) throws NeuralNetworkException {
+
+		feedForward(true, inputValues);
 
 		for (int i=0;i<outputLayer.size();i++) {
 			float actualOutput = outputLayer.get(i).getLastOutput();
@@ -125,7 +133,7 @@ public class NeuralNetwork implements Serializable {
 
 			outputLayer.get(i).setError(error * gradient);
 
-			for (Arco a : outputLayer.get(i).getPrevious()) {
+			for (Connection a : outputLayer.get(i).getPrevious()) {
 				float input = a.getFrom().getLastOutput();
 				float weightChange = - NeuralNetworkSettings.getLearningRate() * 
 						outputLayer.get(i).getError() * input;
@@ -138,12 +146,12 @@ public class NeuralNetwork implements Serializable {
 
 		//Backpropagate through hidden layers
 		for (int i = layers.size() - 2; i > 0; i--) {
-			ArrayList<Neurone> currentLayer = layers.get(i);
+			ArrayList<Neuron> currentLayer = layers.get(i);
 
-			for (Neurone neuron : currentLayer) {
+			for (Neuron neuron : currentLayer) {
 				//Calculate the error signal for this neuron
 				float errorSum = 0.0f;
-				for (Arco a : neuron.getNext()) {
+				for (Connection a : neuron.getNext()) {
 					errorSum += a.getWeight() * a.getTo().getError();
 				}
 
@@ -152,7 +160,7 @@ public class NeuralNetwork implements Serializable {
 				neuron.setError(errorSum * gradient);
 
 				// Update weights for this hidden neuron
-				for (Arco a : neuron.getPrevious()) {
+				for (Connection a : neuron.getPrevious()) {
 					float input = a.getFrom().getLastOutput();
 					float weightChange = - NeuralNetworkSettings.getLearningRate() * 
 							neuron.getError() * input;
@@ -165,9 +173,16 @@ public class NeuralNetwork implements Serializable {
 				}
 			}
 		}
-
 	}
 
+	private void dropout(boolean enable) {
+		for (ArrayList<Neuron> layer : layers) {
+			for (Neuron n : layer) {
+				n.setDropout(enable && RandomSingleton.random() < NeuralNetworkSettings.getDropoutRate());
+			}
+		}
+	}
+	
 	public static NeuralNetwork load(String f) {
 		NeuralNetwork nn = null;
 		try {

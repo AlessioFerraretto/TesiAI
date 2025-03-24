@@ -52,7 +52,7 @@ class TestNonRegressione1 {
 				.output(OUT, ActivationFunctionType.SIGMOID)
 				.build();
 
-		testNeuralNetwork(nn, IN, TEST_EPOCHS, 0.1524454f, 0.8479387f);
+		trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.1524454f, 0.8479387f);
 	}
 
 
@@ -68,7 +68,7 @@ class TestNonRegressione1 {
 				.output(OUT, ActivationFunctionType.BIPOLAR_STEP)
 				.build();
 
-		testNeuralNetwork(nn, IN, TEST_EPOCHS, -1f, 1f);
+		trainNeuralNetwork(nn, IN, TEST_EPOCHS, -1f, 1f);
 
 	}
 
@@ -84,7 +84,7 @@ class TestNonRegressione1 {
 				.output(OUT, ActivationFunctionType.GELU)
 				.build();
 
-		testNeuralNetwork(nn, IN, TEST_EPOCHS, 0.982507f, 0.03504354f);
+		trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.982507f, 0.03504354f);
 	}
 
 	@Test
@@ -99,7 +99,7 @@ class TestNonRegressione1 {
 				.output(OUT, ActivationFunctionType.TANH)
 				.build();
 
-		testNeuralNetwork(nn, IN, TEST_EPOCHS, -0.27816874f, 0.97614646f);
+		trainNeuralNetwork(nn, IN, TEST_EPOCHS, -0.27816874f, 0.97614646f);
 	}
 
 
@@ -115,7 +115,7 @@ class TestNonRegressione1 {
 				.output(OUT, ActivationFunctionType.LINEAR)
 				.build();
 
-		testNeuralNetwork(nn, IN, TEST_EPOCHS, 0.6594737f, 0.34047645f);
+		trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.6594737f, 0.34047645f);
 	}
 
 
@@ -131,11 +131,11 @@ class TestNonRegressione1 {
 				.output(OUT, ActivationFunctionType.RELU)
 				.build();
 
-		testNeuralNetwork(nn, IN, EPOCHS, 0.5217011f, 0.47836763f);
+		trainNeuralNetwork(nn, IN, EPOCHS, 0.5217011f, 0.47836763f);
 	}
 
 
-	void testNeuralNetwork(NeuralNetwork nn, int IN, int EPOCHS, Float... outputs) {
+	static void trainNeuralNetwork(NeuralNetwork nn, int IN, int EPOCHS, Float... outputs) {
 		int OUT = 2;
 
 		ArrayList<Point> points = new ArrayList<>();
@@ -157,7 +157,7 @@ class TestNonRegressione1 {
 				out[1] = points.get(j).getType().equals(Color.BLUE) ? 1f : 0;
 
 				try {
-					nn.test(in, out);
+					nn.train(in, out);
 				} catch (NeuralNetworkException e) {
 					e.printStackTrace();
 				}
@@ -167,7 +167,7 @@ class TestNonRegressione1 {
 
 		Float[] results = null;
 		try {
-			results = nn.evaluate(new Input[] { new Input(0, InputType.CLASSIFICATION), new Input(0, InputType.CLASSIFICATION) });
+			results = nn.feedForward(new Input[] { new Input(0, InputType.CLASSIFICATION), new Input(0, InputType.CLASSIFICATION) });
 		} catch (NeuralNetworkException e) {
 			e.printStackTrace();
 		}

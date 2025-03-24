@@ -5,12 +5,11 @@ import common.NumberController;
 public class NeuralNetworkSettings {
 
 	public final static Float DEFAULT_LEARNING_RATE = 0.01f, EPSILON = 1e-4f;
-	public final static boolean DEFAULT_CALCULATE_DERIVATE_NUMERICALY = false;
-	public static final boolean DEFAULT_USE_INTERTIA = true;
-	public static final Float DEFAULT_ALPHA = 0.93f;
+	public final static boolean DEFAULT_CALCULATE_DERIVATE_NUMERICALY = false, DEFAULT_USE_INTERTIA = true, DEFAULT_DROPOUT = false;
+	public static final Float DEFAULT_ALPHA = 0.93f, DEFAULT_DROPOUT_RATE = 0.1f/100f;
 	
-	private static boolean calculateDerivateNumerically = DEFAULT_CALCULATE_DERIVATE_NUMERICALY, useInertia = DEFAULT_USE_INTERTIA;
-	private static Float learningRate = DEFAULT_LEARNING_RATE, alpha = DEFAULT_ALPHA;
+	private static boolean calculateDerivateNumerically = DEFAULT_CALCULATE_DERIVATE_NUMERICALY, useInertia = DEFAULT_USE_INTERTIA, dropout = DEFAULT_DROPOUT;
+	private static Float learningRate = DEFAULT_LEARNING_RATE, alpha = DEFAULT_ALPHA, dropoutRate = DEFAULT_DROPOUT_RATE;
 	
 	public static Float activationFuncion(ActivationFunctionType type, float x) {
 		switch(type) {
@@ -185,6 +184,18 @@ public class NeuralNetworkSettings {
 
 	public static void setAlpha(float f) {
 		alpha = f;
+	}
+
+	public static boolean getDropout() {
+		return dropout;
+	}
+	
+	public static void setDropout(boolean b) {
+		dropout = b;
+	}
+
+	public static Float getDropoutRate() {
+		return dropoutRate;
 	}
 
 	//if a project contains multiple NeuralNetwork, each one with its own Settings, use this.

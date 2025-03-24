@@ -55,7 +55,7 @@ class TestNonRegressione3 {
 				.output(OUT, ActivationFunctionType.SIGMOID)
 				.build();
 
-		testNeuralNetwork(nn, IN, TEST_EPOCHS, 0.997042f, 0.003229596f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.997042f, 0.003229596f);
 	}
 
 
@@ -71,7 +71,7 @@ class TestNonRegressione3 {
 				.output(OUT, ActivationFunctionType.BIPOLAR_STEP)
 				.build();
 
-		testNeuralNetwork(nn, IN, TEST_EPOCHS, 1f, -1f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 1f, -1f);
 
 	}
 
@@ -87,7 +87,7 @@ class TestNonRegressione3 {
 				.output(OUT, ActivationFunctionType.GELU)
 				.build();
 
-		testNeuralNetwork(nn, IN, TEST_EPOCHS, -4.6248664E-15f, -0f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, -4.6248664E-15f, -0f);
 	}
 
 	@Test
@@ -102,7 +102,7 @@ class TestNonRegressione3 {
 				.output(OUT, ActivationFunctionType.TANH)
 				.build();
 
-		testNeuralNetwork(nn, IN, TEST_EPOCHS, 0.8407494f, 0.8385899f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.8407494f, 0.8385899f);
 	}
 
 
@@ -118,7 +118,7 @@ class TestNonRegressione3 {
 				.output(OUT, ActivationFunctionType.LINEAR)
 				.build();
 
-		testNeuralNetwork(nn, IN, TEST_EPOCHS, -1f, 1f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, -1f, 1f);
 	}
 
 
@@ -134,51 +134,9 @@ class TestNonRegressione3 {
 				.output(OUT, ActivationFunctionType.RELU)
 				.build();
 
-		testNeuralNetwork(nn, IN, EPOCHS, 0f, 0f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, EPOCHS, 0f, 0f);
 	}
 
-
-	void testNeuralNetwork(NeuralNetwork nn, int IN, int EPOCHS, Float... outputs) {
-		int OUT = 2;
-
-		ArrayList<Point> points = new ArrayList<>();
-		for (int i=0;i<10;i++) {
-			points.add(Point.generateRandomPoint(2));
-		}
-
-		//testing 
-		for(int k=0;k<EPOCHS;k++) {
-			Input[] in = new Input[IN];
-			Float[] out = new Float[OUT];
-
-			for(int j=0;j<points.size();j++) {
-				for (int i=0;i<IN;i++) {
-					in[i] = new Input(points.get(j).getInput(i), InputType.CLASSIFICATION);
-
-				}
-				out[0] = points.get(j).getType().equals(Color.RED) ? 1f : 0;
-				out[1] = points.get(j).getType().equals(Color.BLUE) ? 1f : 0;
-
-				try {
-					nn.test(in, out);
-				} catch (NeuralNetworkException e) {
-					e.printStackTrace();
-				}
-			}
-
-		}
-
-		Float[] results = null;
-		try {
-			results = nn.evaluate(new Input[] { new Input(0, InputType.CLASSIFICATION), new Input(0, InputType.CLASSIFICATION) });
-		} catch (NeuralNetworkException e) {
-			e.printStackTrace();
-		}
-
-		for(int i=0;i<OUT;i++) {
-			assertEquals(outputs[i], results[i]);
-		}
-	}
 
 
 }

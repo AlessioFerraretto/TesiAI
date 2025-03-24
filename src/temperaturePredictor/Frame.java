@@ -15,6 +15,7 @@ import neuralNetwork.InputType;
 import neuralNetwork.NeuralNetwork;
 import neuralNetwork.NeuralNetworkBuilder;
 import neuralNetwork.NeuralNetworkException;
+import neuralNetwork.NeuralNetworkSettings;
 
 
 public class Frame extends JFrame {
@@ -24,7 +25,7 @@ public class Frame extends JFrame {
 			HEIGHT = Panel.DIMENSION + 40 + PADDING*2, 
 			GRANULARITY=10;
 	
-	private static final int EPOCHS = 1000;
+	private static  int EPOCHS = 5000;
 
 	
 	private Panel mainPanel;
@@ -70,15 +71,18 @@ public class Frame extends JFrame {
 		if(nn == null) {
 			nn = NeuralNetworkBuilder.Builder()
 					.input(IN)
-					.hidden(3, ActivationFunctionType.GELU)
-					.hidden(3, ActivationFunctionType.GELU)
+					.hidden(4, ActivationFunctionType.GELU)
+					.hidden(4, ActivationFunctionType.GELU)
 					.output(OUT, ActivationFunctionType.SIGMOID)
 					.build();
-
+			
+			train();
+			evaluate();
+			EPOCHS = 1000;
+			NeuralNetworkSettings.setDropout(true);
 			train();
 			
 //			nn.save(FILE_SAVE + FILE_EXTENSION);
-
 
 		}
 
@@ -106,7 +110,7 @@ public class Frame extends JFrame {
 				out[0] = (mainPanel.getTemps().get(j).getValue()-Temperature.MIN_TEMP)/(Temperature.MAX_TEMP-Temperature.MIN_TEMP);
 
 				try {
-					nn.test(in, out);
+					nn.train(in, out);
 				} catch (NeuralNetworkException e) {
 					e.printStackTrace();
 				}
@@ -128,7 +132,7 @@ public class Frame extends JFrame {
 
 			Float[] out = null;
 			try {
-				out = nn.evaluate(inTime);
+				out = nn.feedForward(inTime);
 			} catch (NeuralNetworkException e) {
 				e.printStackTrace();
 			}

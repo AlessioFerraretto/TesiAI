@@ -4,11 +4,11 @@ import java.io.Serializable;
 
 import common.NumberController;
 
-public class NeuroneInput extends Neurone implements Serializable {
+public class NeuronInput extends Neuron implements Serializable {
 
 	protected float value;
 
-	public NeuroneInput() {
+	public NeuronInput() {
 		super(null);
 	}
 

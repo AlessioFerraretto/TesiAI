@@ -5,15 +5,15 @@ import java.io.Serializable;
 import common.NumberController;
 import common.RandomSingleton;
 
-public class Arco implements Serializable {
+public class Connection implements Serializable {
 
 	public static int N = 0;
 	private int id;
 	
-	private Neurone from, to;
+	private Neuron from, to;
 	private float weight, previousWeightChange;
 
-	public Arco(Neurone from, Neurone to, float weight) {
+	public Connection(Neuron from, Neuron to, float weight) {
 		this.from = from;
 		this.to = to;
 		setWeight(weight);
@@ -27,11 +27,11 @@ public class Arco implements Serializable {
 		weight = NumberController.check(weight, 1);
 	}
 
-	public Arco(Neurone from, Neurone to) {
+	public Connection(Neuron from, Neuron to) {
 		this(from, to, RandomSingleton.randFloat(-1,1));
 	}
 
-	public Neurone getFrom() {
+	public Neuron getFrom() {
 		return from;
 	}
 
@@ -44,7 +44,7 @@ public class Arco implements Serializable {
 		setWeight(weight+weightChange);
 	}
 
-	public Neurone getTo() {
+	public Neuron getTo() {
 		return to;
 	}
 

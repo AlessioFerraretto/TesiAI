@@ -84,7 +84,7 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 					out[0] = mainPanel.getPoints().get(j).getType().equals(Color.RED) ? 1f : 0;
 					out[1] = mainPanel.getPoints().get(j).getType().equals(Color.BLUE) ? 1f : 0;
 
-					nn.test(in, out);
+					nn.train(in, out);
 				}
 
 				if(k%1000 == 0) {
@@ -100,7 +100,7 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 					Input inX = new Input(x, InputType.CLASSIFICATION);
 					Input inY = new Input(y, InputType.CLASSIFICATION);
 
-					Float[] out = nn.evaluate(inX, inY);
+					Float[] out = nn.feedForward(inX, inY);
 
 					Color color;
 					if(out[0]>out[1]) {
