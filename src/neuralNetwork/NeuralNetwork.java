@@ -91,16 +91,11 @@ public class NeuralNetwork implements Serializable {
 		return hiddenLayer;
 	}
 
-	public Float[] feedForward(Input... inputValues) throws NeuralNetworkException {
-		return feedForward(false, inputValues);
-	}
-	
-	public Float[] feedForward(boolean train, ArrayList<Input> inputValues) throws NeuralNetworkException {
-		return feedForward(train, (Input[]) inputValues.toArray());
+	public Float[] feedForward(ArrayList<Input> inputValues) throws NeuralNetworkException {
+		return feedForward((Input[]) inputValues.toArray());
 	}
 
-	public Float[] feedForward(boolean train, Input... inputValues) throws NeuralNetworkException {
-		dropout(train && NeuralNetworkSettings.getUseDropout());
+	public Float[] feedForward(Input... inputValues) throws NeuralNetworkException {
 
 		if(inputValues.length!=inputLayer.size()-1) {
 			throw new NeuralNetworkException("Input length mismatch");
@@ -124,7 +119,8 @@ public class NeuralNetwork implements Serializable {
 
 	public Float[] train(Input[] inputValues, Float[] expectedOutputValues) throws NeuralNetworkException {
 
-		feedForward(true, inputValues);
+		dropout(NeuralNetworkSettings.getUseDropout());
+		feedForward(inputValues);
 
 		Float[] predicted = new Float[expectedOutputValues.length];
 		
@@ -181,10 +177,10 @@ public class NeuralNetwork implements Serializable {
 
 	}
 
-	private void dropout(boolean enable) {
+	private void dropout(boolean useDropout) {
 		for (ArrayList<Neuron> layer : layers) {
 			for (Neuron n : layer) {
-				n.setDropout(enable && RandomSingleton.random() < NeuralNetworkSettings.getDropoutRate());
+				n.setDropout(useDropout && RandomSingleton.random() < NeuralNetworkSettings.getDropoutRate());
 			}
 		}
 	}

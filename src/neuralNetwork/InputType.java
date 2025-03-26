@@ -7,8 +7,7 @@ public enum InputType {
 	CLASSIFICATION(0,Panel.DIMENSION),
 
 	TEMPERATURA(0,50),
-	UMIDITA(0,100),
-	XOR(0,1);
+	UMIDITA(0,100);
 	
 	private float minValue, maxValue;
 	
