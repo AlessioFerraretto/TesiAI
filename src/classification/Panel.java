@@ -57,11 +57,18 @@ public class Panel extends JPanel  {
 				}
 
 				Color type;
+				
 				if (SwingUtilities.isRightMouseButton(e)) {
 					type = Color.BLUE;
-				} else {
+				} else if(SwingUtilities.isMiddleMouseButton(e)) {
+					type = Color.GREEN;
+				}
+				else {
 					type = Color.RED;
 				}
+				
+				
+				
 
 				points.add(new Point(type, x, y));
 				frame.repaint();

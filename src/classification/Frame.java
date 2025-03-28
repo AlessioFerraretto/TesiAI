@@ -10,25 +10,27 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
 import common.Point;
+import common.RandomSingleton;
 import neuralNetwork.ActivationFunctionType;
 import neuralNetwork.Input;
 import neuralNetwork.InputType;
 import neuralNetwork.NeuralNetwork;
 import neuralNetwork.NeuralNetworkBuilder;
 import neuralNetwork.NeuralNetworkException;
+import neuralNetwork.NeuralNetworkSettings;
 
 
 public class Frame extends JFrame implements RepaintListener, TrainListener {
 
-	
-	private static final int PREDICTED_POINTS_HIGHLIGHT = 1000, EPOCHS = 100000;
+
+	private static final int PREDICTED_POINTS_HIGHLIGHT = 255, EPOCHS = 1000;
 	public static int WIDTH = Panel.DIMENSION + 150, HEIGHT = Panel.DIMENSION + 40, GRANULARITY=3;
 	private int x, y;
 	private Panel mainPanel;
 	private ButtonPanel buttonPanel;
 
 	NeuralNetwork nn;
-	int IN = 2, OUT = 2;
+	int IN = 2, OUT = 3;
 
 	public Frame() {
 		super("Classification");
@@ -50,13 +52,34 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 		add(buttonPanel);
 
 		setVisible(true);
-		
+
+		NeuralNetworkSettings.setUseInertia(true);
+		NeuralNetworkSettings.setUseDropout(false);
+		NeuralNetworkSettings.setDropoutRate(0.01f);
+
 		nn = NeuralNetworkBuilder.Builder()
 				.input(IN)
-				.hidden(5, ActivationFunctionType.GELU)
-				.hidden(5, ActivationFunctionType.GELU)
+				.hidden(12, ActivationFunctionType.GELU)
+				.hidden(12, ActivationFunctionType.GELU)
 				.output(OUT, ActivationFunctionType.SIGMOID)
 				.build();
+
+		ArrayList<Point> arr = new ArrayList<Point>();
+
+//				faiCose(arr, 10, 5, Color.green);
+				faiCose(arr, 75, 10, Color.red);
+				faiCose(arr, 150, 15, Color.blue);
+				faiCose(arr, 220, 20, Color.green);
+		//		faiCose(arr, 300, 30, Color.blue);
+
+		mainPanel.setPoints(arr);
+	}
+
+	private void faiCose(ArrayList<Point> arr,int r, int N, Color c) {
+		for(int i=0;i<N;i++) {
+			float ang = (float) (((2*Math.PI) / N) * i);
+			arr.add(new Point(c,(int) (350+r*Math.cos(ang)),(int) (350+r*Math.sin(ang))));	
+		}
 	}
 
 	@Override
@@ -66,6 +89,7 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 
 	@Override
 	public void train() {
+
 		mainPanel.setEditable(false);
 		int N = EPOCHS;
 		long startTime = System.currentTimeMillis();
@@ -83,12 +107,14 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 
 					out[0] = mainPanel.getPoints().get(j).getType().equals(Color.RED) ? 1f : 0;
 					out[1] = mainPanel.getPoints().get(j).getType().equals(Color.BLUE) ? 1f : 0;
+					out[2] = mainPanel.getPoints().get(j).getType().equals(Color.GREEN) ? 1f : 0;
 
 					nn.train(in, out);
 				}
 
 				if(k%1000 == 0) {
-				printProgressBar(startTime, k, N);
+					printProgressBar(startTime, k, N);
+//					evaluate();
 				}
 			}
 			System.out.println();
@@ -100,15 +126,29 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 					Input inX = new Input(x, InputType.CLASSIFICATION);
 					Input inY = new Input(y, InputType.CLASSIFICATION);
 
-					Float[] out = nn.feedForward(inX, inY);
+					Float[] out;
+
+					out = nn.feedForward(inX, inY);
+
 
 					Color color;
-					if(out[0]>out[1]) {
-						int transp = Math.min((int) ((out[0]-out[1])*PREDICTED_POINTS_HIGHLIGHT),255);
+//					int r = (int) (255*out[0]);
+//					int g = (int) (255*out[2]);
+//					int b = (int) (255*out[1]);
+//					r = Math.min(r, 255);
+//					g = Math.min(g, 255);
+//					b = Math.min(b, 255);
+//					color = new Color(r,g,b,255);
+
+					if(out[0]>out[1] && out[0]>out[2]) {
+						int transp = Math.min((int) ((2*out[0]-out[1]-out[2])*PREDICTED_POINTS_HIGHLIGHT),255);
 						color = new Color(255,0,0,Math.abs(transp));
-					} else {
-						int transp = Math.min((int) ((out[1]-out[0])*PREDICTED_POINTS_HIGHLIGHT),255);
+					} else if(out[1]>out[0] && out[1]>out[2]) {
+						int transp = Math.min((int) ((2*out[1]-out[1]-out[0])*PREDICTED_POINTS_HIGHLIGHT),255);
 						color = new Color(0,0,255,Math.abs(transp));
+					} else {
+						int transp = Math.min((int) ((2*out[2]-out[1]-out[0])*PREDICTED_POINTS_HIGHLIGHT),255);
+						color = new Color(0,255,0,Math.abs(transp));
 					}
 					determinedPoints.add(new Point(color,x,y));
 				}
@@ -118,13 +158,15 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 
 			mainPanel.setEditable(true);
 			repaint();
-			System.out.println("repainted");
-
-
+			System.out.println("repainted");		
 		} catch (NeuralNetworkException e) {
 			e.printStackTrace();
 		}
 
+
+	}
+
+	private void evaluate() {
 
 	}
 
