@@ -25,7 +25,7 @@ public class Frame extends JFrame {
 			HEIGHT = Panel.DIMENSION + 40 + PADDING*2, 
 			GRANULARITY=10;
 	
-	private static  int EPOCHS = 5000;
+	private static  int EPOCHS = 1000;
 
 	
 	private Panel mainPanel;
@@ -82,8 +82,7 @@ public class Frame extends JFrame {
 //			nn.save(FILE_SAVE + FILE_EXTENSION);
 
 		}
-
-
+		
 	}
 
 	@Override
@@ -103,7 +102,7 @@ public class Frame extends JFrame {
 
 			for(int j=0;j<mainPanel.getTemps().size();j++) {
 				in[0] = new Input(mainPanel.getTemps().get(j).getTime(), InputType.CLASSIFICATION);
-				out[0] = (mainPanel.getTemps().get(j).getValue()-Temperature.MIN_TEMP)/(Temperature.MAX_TEMP-Temperature.MIN_TEMP);
+				out[0] = Input.normalize(mainPanel.getTemps().get(j).getValue(), InputType.TEMPERATURA);
 				
 				try {
 					predicted = nn.train(in, out);
@@ -138,7 +137,7 @@ public class Frame extends JFrame {
 				e.printStackTrace();
 			}
 
-			predictedTemps.add(new Temperature(time, (out[0]*(Temperature.MAX_TEMP-Temperature.MIN_TEMP)) + Temperature.MIN_TEMP));
+			predictedTemps.add(new Temperature(time, Input.deNormalize(out[0], InputType.TEMPERATURA)));
 		}
 		mainPanel.setPredictedTemps(predictedTemps);
 

@@ -1,11 +1,11 @@
 package neuralNetwork;
 
 import classification.Panel;
+import temperaturePredictor.Temperature;
 
 public enum InputType {
 
 	CLASSIFICATION(0,Panel.DIMENSION),
-
 	TEMPERATURA(0,50),
 	UMIDITA(0,100);
 	

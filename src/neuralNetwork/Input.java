@@ -20,27 +20,30 @@ public class Input {
 
 	public float getValue() {
 		if(normalize) {
-			return normalize();
+			return normalize(value, type);
 		}
-
 		return value;
 	}
 
-	public String toString() {
-		return getValue()+"";
-	}
-
 	//normalizes a value in the range [-1, 1]
-	public float normalize() {
-		return (value - type.getMinValue() - (type.getMaxValue()-type.getMinValue())/2) / ((type.getMaxValue()-type.getMinValue())/2);
+	public static float normalize(float value, InputType type) {
+		float delta = type.getMaxValue()-type.getMinValue();
+		return 2*(value - type.getMinValue() - delta/2) / delta;
 	}
 
+
+	public static float deNormalize(float value, InputType type) {
+		float delta = type.getMaxValue()-type.getMinValue();
+		return value * delta / 2 + type.getMinValue() + delta/2;
+	}
+	
 	//normalizes a value in the range [0, 1]
-	public float normalizePositive() {
+	public static float normalizePositive(float value, InputType type) {
 		return (value - type.getMinValue()) / (type.getMaxValue()-type.getMinValue());
 	}
-
-//	public static float deNormalize(Float v, InputType type) {
-//		return v*(type.getMaxValue()-type.getMinValue())/2;
-//	}
+	
+	public static float deNormalizePositive(Float value, InputType type) {
+		float delta = type.getMaxValue()-type.getMinValue();
+		return value * delta + type.getMinValue();
+	}
 }
