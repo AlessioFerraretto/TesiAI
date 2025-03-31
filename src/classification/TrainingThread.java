@@ -14,6 +14,7 @@ public class TrainingThread extends Thread {
 	private int EPOCHS;
 	private NeuralNetwork nn;
 	private EvaluateInterface e;
+	private final int INTERVAL=50;
 
 	public TrainingThread(EvaluateInterface e, ArrayList<Point> points, int EPOCHS, NeuralNetwork nn) {
 		this.e = e;
@@ -44,10 +45,9 @@ public class TrainingThread extends Thread {
 					nn.train(in, out);
 				}
 
-				if(k%50 == 0) {
+				if(k%INTERVAL == 0) {
 					printProgressBar(startTime, k, N);
 					e.evaluate();
-					//					evaluate();
 				}
 			}
 			System.out.println();

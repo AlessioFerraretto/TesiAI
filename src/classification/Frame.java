@@ -54,7 +54,7 @@ public class Frame extends JFrame implements RepaintListener, TrainListener, Eva
 		setVisible(true);
 
 		NeuralNetworkSettings.setUseInertia(true);
-		NeuralNetworkSettings.setUseDropout(false);
+//		NeuralNetworkSettings.setUseDropout(true);
 		NeuralNetworkSettings.setDropoutRate(0.01f);
 
 		nn = NeuralNetworkBuilder.Builder()
@@ -89,14 +89,10 @@ public class Frame extends JFrame implements RepaintListener, TrainListener, Eva
 	public void train() {
 		mainPanel.setEditable(false);
 
-
 		TrainingThread tt = new TrainingThread(this, mainPanel.getPoints(), EPOCHS, nn);
 		tt.start();
 		
 		evaluate();
-
-			
-
 	}
 
 	@Override
@@ -123,12 +119,10 @@ public class Frame extends JFrame implements RepaintListener, TrainListener, Eva
 				determinedPoints.add(new Point(color,x,y));
 			}
 		}
-		System.out.println("done");
 		mainPanel.setPredictedPoints(determinedPoints);
 
 		mainPanel.setEditable(true);
 		repaint();
-		System.out.println("repainted");	
 		
 		}catch(Exception e) {
 			e.printStackTrace();

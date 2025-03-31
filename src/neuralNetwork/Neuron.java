@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import common.NumberController;
+import common.RandomSingleton;
 
 public class Neuron implements Serializable {
 	public static int N = 0;
@@ -12,8 +13,6 @@ public class Neuron implements Serializable {
 	protected ActivationFunctionType activationFunctionType;
 	protected ArrayList<Connection> previous, next;
 	
-	private boolean dropout;
-
 	private float lastOutputX, lastOutputY, error;
 
 	public Neuron(ActivationFunctionType activationFunctionType) {
@@ -22,7 +21,6 @@ public class Neuron implements Serializable {
 		N++;
 		previous = new ArrayList<>();
 		next = new ArrayList<>();
-		dropout = false;
 	}
 
 	public ArrayList<Connection> getPrevious() {
@@ -34,8 +32,10 @@ public class Neuron implements Serializable {
 	}
 
 	protected Float evaluate() {
-		if(dropout) {
-			return 0f;
+		if(NeuralNetworkSettings.getUseDropout()) {
+			if(RandomSingleton.random() < NeuralNetworkSettings.getDropoutRate()) {
+				return 0f;
+			}
 		}
 		
 		float sum = 0;
@@ -48,7 +48,7 @@ public class Neuron implements Serializable {
 		
 		lastOutputY = NumberController.check(lastOutputY, 4);
 		
-		if(dropout) 	 {
+		if(NeuralNetworkSettings.getUseDropout()) 	 {
 		    lastOutputY *= 1 / (1 - NeuralNetworkSettings.getDropoutRate());  // Scala l'output per compensare il dropout nel training
 		}
 		
@@ -105,8 +105,5 @@ public class Neuron implements Serializable {
 		return getLastOutputY();
 	}
 
-	public void setDropout(boolean b) {
-		dropout = b;
-	}
 
 }

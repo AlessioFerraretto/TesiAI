@@ -63,7 +63,7 @@ private static final int TEST_EPOCHS = 5000, TEST_SEED = 1;
 				.output(OUT, ActivationFunctionType.SIGMOID)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.99839514f, 0.0017123626f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.99873257f, 0.0013393123f);
 	}
 
 
@@ -79,7 +79,7 @@ private static final int TEST_EPOCHS = 5000, TEST_SEED = 1;
 				.output(OUT, ActivationFunctionType.BIPOLAR_STEP)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, -1f, 1f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 1f, -1f);
 
 	}
 
@@ -95,7 +95,7 @@ private static final int TEST_EPOCHS = 5000, TEST_SEED = 1;
 				.output(OUT, ActivationFunctionType.GELU)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.7141436f, -1.4383781E-5f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, -0.06640351f, -0f);
 	}
 
 	@Test
@@ -110,7 +110,7 @@ private static final int TEST_EPOCHS = 5000, TEST_SEED = 1;
 				.output(OUT, ActivationFunctionType.TANH)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.7298906f, 0.99522424f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.79514927f, 0.9313916f);
 	}
 
 	@Test
@@ -125,7 +125,7 @@ private static final int TEST_EPOCHS = 5000, TEST_SEED = 1;
 				.output(OUT, ActivationFunctionType.RELU)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, EPOCHS, 0.82918274f, 0f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, EPOCHS, 0f, 1f);
 	}
 
 

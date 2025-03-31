@@ -64,7 +64,7 @@ class TestNonRegressione4 {
 				.output(OUT, ActivationFunctionType.SIGMOID)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.9989032f, 0.0011601417f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.9989549f, 0.0010990949f);
 	}
 
 
@@ -96,7 +96,7 @@ class TestNonRegressione4 {
 				.output(OUT, ActivationFunctionType.GELU)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.65702367f, 0.33645245f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, -0f, -0f);
 	}
 
 	@Test
@@ -111,7 +111,7 @@ class TestNonRegressione4 {
 				.output(OUT, ActivationFunctionType.TANH)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, -0.17206877f, 0.99987316f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, TEST_EPOCHS, 0.895593f, 0.8912622f);
 	}
 
 	@Test
@@ -126,7 +126,7 @@ class TestNonRegressione4 {
 				.output(OUT, ActivationFunctionType.RELU)
 				.build();
 
-		TestNonRegressione1.trainNeuralNetwork(nn, IN, EPOCHS, 0f, 0.40723327f);
+		TestNonRegressione1.trainNeuralNetwork(nn, IN, EPOCHS, 0f, 1.0324479f);
 	}
 
 

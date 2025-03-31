@@ -15,7 +15,6 @@ public class Panel extends JPanel  {
 	public static final int DIMENSION = 700, SIZE = 20, PREDICTED_SIZE = 2;
 	private static final long timeBetweenPresses = 100;
 	
-	private RepaintListener frame;
 	private ArrayList<Point> points;
 	private ArrayList<Point> predictedPoints;
 	private long lastPress;
@@ -23,7 +22,6 @@ public class Panel extends JPanel  {
 
 	public Panel(RepaintListener frame) {
 		super();
-		this.frame = frame;
 		points = new ArrayList<Point>();
 		predictedPoints = new ArrayList<Point>();
 		editable = true;
