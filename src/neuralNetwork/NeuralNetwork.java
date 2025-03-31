@@ -228,4 +228,12 @@ public class NeuralNetwork implements Serializable {
 		}
 
 	}
+
+	public int getIn() {
+		return inputLayer.size();
+	}
+	
+	public int getOut() {
+		return outputLayer.size();
+	}
 }

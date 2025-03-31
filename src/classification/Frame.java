@@ -20,11 +20,11 @@ import neuralNetwork.NeuralNetworkException;
 import neuralNetwork.NeuralNetworkSettings;
 
 
-public class Frame extends JFrame implements RepaintListener, TrainListener {
+public class Frame extends JFrame implements RepaintListener, TrainListener, EvaluateInterface {
 
 
-	private static final int PREDICTED_POINTS_HIGHLIGHT = 255, EPOCHS = 1000;
-	public static int WIDTH = Panel.DIMENSION + 150, HEIGHT = Panel.DIMENSION + 40, GRANULARITY=3;
+	private static final int EPOCHS = 1000;
+	public static int WIDTH = Panel.DIMENSION + 150, HEIGHT = Panel.DIMENSION + 40, GRANULARITY=1;
 	private int x, y;
 	private Panel mainPanel;
 	private ButtonPanel buttonPanel;
@@ -59,26 +59,24 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 
 		nn = NeuralNetworkBuilder.Builder()
 				.input(IN)
-				.hidden(12, ActivationFunctionType.GELU)
-				.hidden(12, ActivationFunctionType.GELU)
+				.hidden(5, ActivationFunctionType.GELU)
+				.hidden(5, ActivationFunctionType.GELU)
 				.output(OUT, ActivationFunctionType.SIGMOID)
 				.build();
 
-		ArrayList<Point> arr = new ArrayList<Point>();
-
-//				faiCose(arr, 10, 5, Color.green);
-				faiCose(arr, 75, 10, Color.red);
-				faiCose(arr, 150, 15, Color.blue);
-				faiCose(arr, 220, 20, Color.green);
-		//		faiCose(arr, 300, 30, Color.blue);
-
-		mainPanel.setPoints(arr);
+//		ArrayList<Point> testPoints = new ArrayList<Point>();
+//				aggiungiCirconferenza(arr, 10, 5, Color.green);
+//				aggiungiCirconferenza(arr, 75, 10, Color.red);
+//				aggiungiCirconferenza(arr, 150, 15, Color.blue);
+//				aggiungiCirconferenza(arr, 220, 20, Color.green);
+		//		aggiungiCirconferenza(arr, 300, 30, Color.blue);
+//		mainPanel.setPoints(testPoints);
 	}
 
-	private void faiCose(ArrayList<Point> arr,int r, int N, Color c) {
+	private void aggiungiCirconferenza(ArrayList<Point> arr, int r, int N, Color c) {
 		for(int i=0;i<N;i++) {
 			float ang = (float) (((2*Math.PI) / N) * i);
-			arr.add(new Point(c,(int) (350+r*Math.cos(ang)),(int) (350+r*Math.sin(ang))));	
+			arr.add(new Point(c,(int) (Panel.DIMENSION/2+r*Math.cos(ang)),(int) (Panel.DIMENSION/2+r*Math.sin(ang))));	
 		}
 	}
 
@@ -89,114 +87,53 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 
 	@Override
 	public void train() {
-
 		mainPanel.setEditable(false);
-		int N = EPOCHS;
-		long startTime = System.currentTimeMillis();
 
+
+		TrainingThread tt = new TrainingThread(this, mainPanel.getPoints(), EPOCHS, nn);
+		tt.start();
+		
+		evaluate();
+
+			
+
+	}
+
+	@Override
+	public void evaluate() {
 		try {
+		//evaluating
+		ArrayList<Point> determinedPoints = new ArrayList<Point>();
+		for(int x=0;x<Panel.DIMENSION;x+=GRANULARITY) {
+			for(int y=0;y<Panel.DIMENSION;y+=GRANULARITY) {
+				Input inX = new Input(x, InputType.CLASSIFICATION);
+				Input inY = new Input(y, InputType.CLASSIFICATION);
 
-			//testing 
-			for(int k=0;k<N;k++) {
-				Input[] in = new Input[IN];
-				Float[] out = new Float[OUT];
+				Float[] out;
 
-				for(int j=0;j<mainPanel.getPoints().size();j++) {
-					in[0] = new Input(mainPanel.getPoints().get(j).getInput(0), InputType.CLASSIFICATION);
-					in[1] = new Input(mainPanel.getPoints().get(j).getInput(1), InputType.CLASSIFICATION);
+				out = nn.feedForward(inX, inY);
 
-					out[0] = mainPanel.getPoints().get(j).getType().equals(Color.RED) ? 1f : 0;
-					out[1] = mainPanel.getPoints().get(j).getType().equals(Color.BLUE) ? 1f : 0;
-					out[2] = mainPanel.getPoints().get(j).getType().equals(Color.GREEN) ? 1f : 0;
 
-					nn.train(in, out);
-				}
+				Color color;
+				int r = Math.min((int) (255*out[0]),255);
+				int g = Math.min((int) (255*out[1]),255);
+				int b = Math.min((int) (255*out[2]),255);
+				color = new Color(r,g,b,255);
 
-				if(k%1000 == 0) {
-					printProgressBar(startTime, k, N);
-//					evaluate();
-				}
+				determinedPoints.add(new Point(color,x,y));
 			}
-			System.out.println();
+		}
+		System.out.println("done");
+		mainPanel.setPredictedPoints(determinedPoints);
 
-			//evaluating
-			ArrayList<Point> determinedPoints = new ArrayList<Point>();
-			for(int x=0;x<Panel.DIMENSION;x+=GRANULARITY) {
-				for(int y=0;y<Panel.DIMENSION;y+=GRANULARITY) {
-					Input inX = new Input(x, InputType.CLASSIFICATION);
-					Input inY = new Input(y, InputType.CLASSIFICATION);
-
-					Float[] out;
-
-					out = nn.feedForward(inX, inY);
-
-
-					Color color;
-//					int r = (int) (255*out[0]);
-//					int g = (int) (255*out[2]);
-//					int b = (int) (255*out[1]);
-//					r = Math.min(r, 255);
-//					g = Math.min(g, 255);
-//					b = Math.min(b, 255);
-//					color = new Color(r,g,b,255);
-
-					if(out[0]>out[1] && out[0]>out[2]) {
-						int transp = Math.min((int) ((2*out[0]-out[1]-out[2])*PREDICTED_POINTS_HIGHLIGHT),255);
-						color = new Color(255,0,0,Math.abs(transp));
-					} else if(out[1]>out[0] && out[1]>out[2]) {
-						int transp = Math.min((int) ((2*out[1]-out[1]-out[0])*PREDICTED_POINTS_HIGHLIGHT),255);
-						color = new Color(0,0,255,Math.abs(transp));
-					} else {
-						int transp = Math.min((int) ((2*out[2]-out[1]-out[0])*PREDICTED_POINTS_HIGHLIGHT),255);
-						color = new Color(0,255,0,Math.abs(transp));
-					}
-					determinedPoints.add(new Point(color,x,y));
-				}
-			}
-			System.out.println("done");
-			mainPanel.setPredictedPoints(determinedPoints);
-
-			mainPanel.setEditable(true);
-			repaint();
-			System.out.println("repainted");		
-		} catch (NeuralNetworkException e) {
+		mainPanel.setEditable(true);
+		repaint();
+		System.out.println("repainted");	
+		
+		}catch(Exception e) {
 			e.printStackTrace();
 		}
 
-
-	}
-
-	private void evaluate() {
-
-	}
-
-	private void printProgressBar(long startTime, int i, long total) {
-		clearLine();
-		printPB((int) ((i * 100.0) / total), ((System.currentTimeMillis() - startTime) * total) / (i + 1) - (System.currentTimeMillis() - startTime));
-
-	}
-
-	private void printPB(int percent, long remainingTimeMillis) {
-		int barLength = 50;
-		int filledLength = (percent * barLength) / 100;
-
-		StringBuilder bar = new StringBuilder();
-		bar.append("[");
-		for (int j = 0; j < barLength; j++) {
-			if (j < filledLength) {
-				bar.append("=");
-			} else {
-				bar.append(" ");
-			}
-		}
-		bar.append("] ");
-
-		System.out.print("\r" + bar + percent + "% - Remaining time: " + remainingTimeMillis / 1000 + "s");
-	}
-
-	private static void clearLine() {
-		System.out.print("\033[F");  // Move cursor up one line
-		System.out.print("\033[2K"); // Clear the entire line
 	}
 
 }
