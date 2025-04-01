@@ -9,7 +9,7 @@ import common.RandomSingleton;
 
 public class myMain {
 
-	static final String FILE_NAME = "Qualita_Aria-t3.csv", SEPARATOR = ",";
+	private static final String FILE_NAME = "Qualita_Aria-t3.csv", SEPARATOR = ",";
 	
 	public static void main(String[] args) {
 

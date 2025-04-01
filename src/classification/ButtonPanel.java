@@ -14,7 +14,15 @@ public class ButtonPanel extends JPanel {
 		
 		setMaximumSize(new Dimension(1000,200));
 		run = new Button("Train");
-		run.addActionListener(e->frame.train());
+		run.addActionListener(e-> {
+			new Thread() {
+				@Override
+				public void run() {
+				frame.train();
+				}
+			}.start();
+			
+		});
 		add(run);
 
 	}

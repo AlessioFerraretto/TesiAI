@@ -20,13 +20,10 @@ import neuralNetwork.NeuralNetworkSettings;
 
 public class Frame extends JFrame {
 
-	public static int PADDING = 50, 
+	public final static int PADDING = 50, 
 			WIDTH = Panel.DIMENSION + 17 + PADDING*2, //
 			HEIGHT = Panel.DIMENSION + 40 + PADDING*2, 
-			GRANULARITY=10;
-	
-	private static  int EPOCHS = 1000;
-
+			GRANULARITY=10, EVALUATION_INTERVAL = 1000, EPOCHS = 10000;
 	
 	private Panel mainPanel;
 	private static String FILE_SAVE = "save", FILE_EXTENSION = ".dat"; 
@@ -71,9 +68,9 @@ public class Frame extends JFrame {
 		if(nn == null) {
 			nn = NeuralNetworkBuilder.Builder()
 					.input(IN)
-					.hidden(5, ActivationFunctionType.GELU)
-					.hidden(5, ActivationFunctionType.GELU)
-					.output(OUT, ActivationFunctionType.SIGMOID)
+					.hidden(2, ActivationFunctionType.GELU)
+					.hidden(2, ActivationFunctionType.GELU)
+					.output(OUT, ActivationFunctionType.TANH)
 					.build();
 			
 			train();
@@ -111,7 +108,7 @@ public class Frame extends JFrame {
 				}
 			}
 
-			if(k%100 == 0) {
+			if(k%EVALUATION_INTERVAL == 0) {
 				printProgressBar(startTime, k, N);
 				
 				feedForwardAndPaint();

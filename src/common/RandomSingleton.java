@@ -3,7 +3,7 @@ import java.util.Random;
 
 public class RandomSingleton {
 
-	private final static long SEED = 5;
+	private final static long SEED = 2;
 	private RandomSingleton() {}
 	
 	private static Random r;
