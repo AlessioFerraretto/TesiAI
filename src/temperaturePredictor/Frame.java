@@ -21,8 +21,8 @@ import neuralNetwork.NeuralNetworkSettings;
 public class Frame extends JFrame {
 
 	public final static int PADDING = 50, 
-			WIDTH = Panel.DIMENSION + 17 + PADDING*2, //
-			HEIGHT = Panel.DIMENSION + 40 + PADDING*2, 
+			WIDTH = Panel.DIMENSION + 17 + PADDING*2 + Panel.OFFSET_X*2, //
+			HEIGHT = Panel.DIMENSION + 40 + PADDING*2 + Panel.OFFSET_Y*2, 
 			GRANULARITY=10, EVALUATION_INTERVAL = 1000, EPOCHS = 10000;
 	
 	private Panel mainPanel;
