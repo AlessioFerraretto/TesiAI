@@ -4,27 +4,25 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.util.ArrayList;
-import java.util.Random;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
 import common.Point;
-import common.RandomSingleton;
+import common.ScreenshotTaker;
 import neuralNetwork.ActivationFunctionType;
 import neuralNetwork.Input;
 import neuralNetwork.InputType;
 import neuralNetwork.NeuralNetwork;
 import neuralNetwork.NeuralNetworkBuilder;
-import neuralNetwork.NeuralNetworkException;
 import neuralNetwork.NeuralNetworkSettings;
 
 
 public class Frame extends JFrame implements RepaintListener, TrainListener {
 
 
-	public static final int EPOCHS = 1000, EVALUATION_INTERVAL = 50;
-	public static final int WIDTH = Panel.DIMENSION + 150, HEIGHT = Panel.DIMENSION + 40, GRANULARITY=1;
+	public static final int EPOCHS = 200, EVALUATION_INTERVAL = 50;
+	public static final int WIDTH = Panel.DIMENSION + 300, HEIGHT = Panel.DIMENSION + 40, GRANULARITY=1;
 	private Panel mainPanel;
 	private ButtonPanel buttonPanel;
 
@@ -84,8 +82,6 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 
 	@Override
 	public void train() {
-		mainPanel.setEditable(false);
-
 		ArrayList<Point> points = mainPanel.getPoints();
 		long startTime = System.currentTimeMillis();
 
@@ -108,6 +104,7 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 				if(k%EVALUATION_INTERVAL == 0) {
 					printProgressBar(startTime, k, EPOCHS);
 					feedForward();
+					ScreenshotTaker.take();
 				}
 			}
 
@@ -115,7 +112,8 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 			e.printStackTrace();
 		}
 
-		mainPanel.setEditable(false);
+		mainPanel.setEditable(true);
+
 
 	}
 
