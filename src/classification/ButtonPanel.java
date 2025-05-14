@@ -1,23 +1,18 @@
 package classification;
 
-import java.awt.AWTException;
 import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.Robot;
-import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 
-import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 import common.ScreenshotTaker;
 
 public class ButtonPanel extends JPanel {
 
-	private Button run, saveImage;
+	private Button run, saveImage, saveInputs;
 	private TrainListener frame;
 	public ButtonPanel(TrainListener frame) {
 		super();
@@ -34,12 +29,29 @@ public class ButtonPanel extends JPanel {
 			}.start();
 
 		});
-		saveImage = new Button("Save image");
+		saveImage = new Button("img");
 		saveImage.addActionListener(e -> {
 			ScreenshotTaker.take();
 		});
+		
+		saveInputs = new Button("in");
+		saveInputs.addActionListener(e -> {
+			
+			 ObjectOutputStream oos;
+			try {
+				oos = new ObjectOutputStream(new FileOutputStream("inputs.dat"));
+				oos.writeObject(frame.getInputs());
+				oos.close();
+
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			 
+		});
+		
 		add(run);
 		add(saveImage);
+		add(saveInputs);
 
 	}
 

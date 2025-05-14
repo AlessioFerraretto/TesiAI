@@ -22,19 +22,20 @@ public class ScreenshotTaker {
 		int w = (int) screenSize.getWidth();
 		int h = (int) screenSize.getHeight();
 
-		take((w-Panel.DIMENSION) / 2 - 141, (h-Panel.DIMENSION) / 2 + 11, Panel.DIMENSION, Panel.DIMENSION);
+		take((w-Panel.DIMENSION) / 2 - 141, (h-Panel.DIMENSION) / 2 + 2, Panel.DIMENSION, Panel.DIMENSION);
 		
 	}
-	public static void take(int x, int y, int w, int h) {
-		
+	
+	private static void take(int x, int y, int w, int h) {
 		Robot r;
 		try {
 			r = new Robot();
 			BufferedImage img = r.createScreenCapture(new Rectangle(x,y,w,h));
 			
-			i++;
 			File f = new File("images/image"+i+".png");
 			ImageIO.write(img, "png", f);
+			i++;
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

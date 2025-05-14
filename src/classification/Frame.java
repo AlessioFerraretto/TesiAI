@@ -3,6 +3,9 @@ package classification;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
@@ -20,9 +23,8 @@ import neuralNetwork.NeuralNetworkSettings;
 
 public class Frame extends JFrame implements RepaintListener, TrainListener {
 
-
-	public static final int EPOCHS = 200, EVALUATION_INTERVAL = 50;
-	public static final int WIDTH = Panel.DIMENSION + 300, HEIGHT = Panel.DIMENSION + 40, GRANULARITY=1;
+	public static final int EPOCHS = 10000, EVALUATION_INTERVAL = 50;
+	public static final int WIDTH = Panel.DIMENSION + 300, HEIGHT = Panel.DIMENSION + 60, GRANULARITY=1;
 	private Panel mainPanel;
 	private ButtonPanel buttonPanel;
 
@@ -35,6 +37,8 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int w = (int) screenSize.getWidth();
 		int h = (int) screenSize.getHeight();
+		
+        setUndecorated(false);
 
 		setBounds((w-WIDTH) / 2, (h-HEIGHT) / 2, WIDTH, HEIGHT);
 
@@ -48,14 +52,25 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 
 		setVisible(true);
 
-		NeuralNetworkSettings.setUseInertia(true);
-		//		NeuralNetworkSettings.setUseDropout(true);
+		//		NeuralNetworkSettings.setUseInertia(true);
+		NeuralNetworkSettings.setUseDropout(true);
 		NeuralNetworkSettings.setDropoutRate(0.01f);
+		NeuralNetworkSettings.setUseInertia(true);
 
+		try {
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("inputs.dat"));
+			mainPanel.setPoints((ArrayList<Point>) ois.readObject());
+			ois.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+		
+		repaint();
+		
 		nn = NeuralNetworkBuilder.Builder()
 				.input(IN)
-				.hidden(12, ActivationFunctionType.GELU)
-				.hidden(12, ActivationFunctionType.GELU)
+				.hidden(4, ActivationFunctionType.GELU)
+				.hidden(4, ActivationFunctionType.GELU)
 				.output(OUT, ActivationFunctionType.SIGMOID)
 				.build();
 
@@ -82,6 +97,8 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 
 	@Override
 	public void train() {
+		ScreenshotTaker.take();
+
 		ArrayList<Point> points = mainPanel.getPoints();
 		long startTime = System.currentTimeMillis();
 
@@ -102,9 +119,13 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 				}
 
 				if(k%EVALUATION_INTERVAL == 0) {
-					printProgressBar(startTime, k, EPOCHS);
-					feedForward();
-					ScreenshotTaker.take();
+					
+					if(k!=0) {
+						feedForward();
+
+					}
+//					printProgressBar(startTime, k, EPOCHS);
+					
 				}
 			}
 
@@ -112,8 +133,11 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 			e.printStackTrace();
 		}
 
-		mainPanel.setEditable(true);
+		printProgressBar(startTime, EPOCHS, EPOCHS);
+		feedForward();
+		
 
+		mainPanel.setEditable(true);
 
 	}
 
@@ -143,13 +167,26 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 			mainPanel.setPredictedPoints(determinedPoints);
 
 			repaint();
+			
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			ScreenshotTaker.take();
+
+
 
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
 
 	}
-
+	
+	public ArrayList<Point> getInputs() {
+		return mainPanel.getPoints();
+	}
 
 	private void printProgressBar(long startTime, int i, long total) {
 		clearLine();
@@ -179,5 +216,7 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 		System.out.print("\033[F");  // Move cursor up one line
 		System.out.print("\033[2K"); // Clear the entire line
 	}
+
+	
 
 }

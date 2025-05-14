@@ -93,9 +93,9 @@ public class Panel extends JPanel  {
 		super.paint(g);
 
 		g.setColor(Color.WHITE);
-		g.fillRect(0, 0, DIMENSION, DIMENSION);
+		g.fillRect(0, 0, DIMENSION+1, DIMENSION+1);
 		g.setColor(Color.BLACK);
-		g.drawRect(0, 0, DIMENSION, DIMENSION);
+		g.drawRect(0, 0, DIMENSION+1, DIMENSION+1);
 		
 		for(Point p : predictedPoints) {
 			g.setColor(p.getType());

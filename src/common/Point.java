@@ -1,6 +1,7 @@
 package common;
 
 import java.awt.Color;
+import java.io.Serializable;
 
 /**
  * 
@@ -8,7 +9,7 @@ import java.awt.Color;
 /**
  * 
  */
-public class Point {
+public class Point implements Serializable {
 
 	private Color type;
 	private int[] input;
