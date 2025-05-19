@@ -12,36 +12,38 @@ import neuralNetwork.NeuralNetworkException;
 public class ThreadEvaluation extends Thread {
 
 	private int y;
-	private ArrayList<Point> array;
+	private ArrayList<Point> predictedPoints;
 	private NeuralNetwork nn;
 
-	public ThreadEvaluation(int y, ArrayList<Point> array, NeuralNetwork nn) {
+	public ThreadEvaluation(int y, ArrayList<Point> predictedPoints, NeuralNetwork nn) {
 		super();
 		this.y = y;
-		this.array = array;
+		this.predictedPoints = predictedPoints;
 		this.nn = nn;
 	}
 
 	public void run() {
+		Input inX;
+		Float[] predicted = null;
+		Color color;
+
 		try {
 			Input inY = new Input(y, InputType.CLASSIFICATION);
 			for(int x=0;x<Panel.DIMENSION;x+=Frame.GRANULARITY) {
-				Input inX = new Input(x, InputType.CLASSIFICATION);
+				inX = new Input(x, InputType.CLASSIFICATION);
 
-				Float[] out = null;
+				predicted = nn.feedForward(inX, inY);
 
-				out = nn.feedForward(inX, inY);
-
-				Color color;
-				int r = Math.min((int) (255*out[0]),255);
-				int g = Math.min((int) (255*out[1]),255);
-				int b = Math.min((int) (255*out[2]),255);
+				int r = Math.min((int) (255*predicted[0]),255);
+				int g = Math.min((int) (255*predicted[1]),255);
+				int b = Math.min((int) (255*predicted[2]),255);
 				color = new Color(r,g,b,255);
 
-				synchronized (array) {
-					array.add(new Point(color,x,y));
+				synchronized (predictedPoints) {
+					predictedPoints.add(new Point(color,x,y));
 				}
 			}
+			
 		} catch (NeuralNetworkException e) {
 			e.printStackTrace();
 		}

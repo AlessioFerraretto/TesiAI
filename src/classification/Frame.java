@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import common.Point;
+import common.ProgressBarUtil;
 import common.ScreenshotTaker;
 import neuralNetwork.ActivationFunctionType;
 import neuralNetwork.Input;
@@ -50,41 +51,24 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 
 		setVisible(true);
 
-		NeuralNetworkSettings.setUseDropout(true);
-		NeuralNetworkSettings.setDropoutRate(0.2f);
-		NeuralNetworkSettings.setUseInertia(true);
-
 		try {
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("inputsEsempio2.dat"));
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("inputsEsempio3.dat"));
 			mainPanel.setPoints((ArrayList<Point>) ois.readObject());
 			ois.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		repaint();
+		NeuralNetworkSettings.setUseDropout(true);
+		NeuralNetworkSettings.setDropoutRate(0.1f);
+		NeuralNetworkSettings.setUseInertia(true);
 
 		nn = NeuralNetworkBuilder.Builder()
 				.input(IN)
-				.hidden(4, ActivationFunctionType.GELU)
-				.hidden(4, ActivationFunctionType.GELU)
+				.hidden(12, ActivationFunctionType.GELU)
+				.hidden(12, ActivationFunctionType.GELU)
 				.output(OUT, ActivationFunctionType.SIGMOID)
 				.build();
-
-		//		ArrayList<Point> testPoints = new ArrayList<Point>();
-		//				aggiungiCirconferenza(arr, 10, 5, Color.green);
-		//				aggiungiCirconferenza(arr, 75, 10, Color.red);
-		//				aggiungiCirconferenza(arr, 150, 15, Color.blue);
-		//				aggiungiCirconferenza(arr, 220, 20, Color.green);
-		//		aggiungiCirconferenza(arr, 300, 30, Color.blue);
-		//		mainPanel.setPoints(testPoints);
-	}
-
-	private void aggiungiCirconferenza(ArrayList<Point> arr, int r, int N, Color c) {
-		for(int i=0;i<N;i++) {
-			float ang = (float) (((2*Math.PI) / N) * i);
-			arr.add(new Point(c,(int) (Panel.DIMENSION/2+r*Math.cos(ang)),(int) (Panel.DIMENSION/2+r*Math.sin(ang))));	
-		}
 	}
 
 	@Override
@@ -95,9 +79,8 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 	@Override
 	public void train() {
 		mainPanel.setEditable(false);
-		java.awt.Point locationOnScreen = mainPanel.getLocationOnScreen();
-		Rectangle r = new Rectangle(locationOnScreen, new Dimension(Panel.DIMENSION,Panel.DIMENSION));
-		ScreenshotTaker.take(r);
+
+		takeScreenshot();
 
 		ArrayList<Point> points = mainPanel.getPoints();
 		long startTime = System.currentTimeMillis();
@@ -105,9 +88,7 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 		for(int k=0;k<EPOCHS;k++) {
 			Input[] in = new Input[nn.getIn()];
 			Float[] out = new Float[nn.getOut()];
-			Float[] predicted = null;
 
-			float mae = 0, mse = 0;
 			for(int j=0;j<points.size();j++) {
 				in[0] = new Input(points.get(j).getInput(0), InputType.CLASSIFICATION);
 				in[1] = new Input(points.get(j).getInput(1), InputType.CLASSIFICATION);
@@ -117,46 +98,38 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 				out[2] = points.get(j).getType().equals(Color.BLUE) ? 1f : 0;
 
 				try {
-					predicted = nn.train(in, out);
+					nn.train(in, out);
 				} catch (NeuralNetworkException e) {
 					e.printStackTrace();
 				}
-
-				mae += NeuralNetwork.calculateMAE(out, predicted);
-				mse += NeuralNetwork.calculateMSE(out, predicted);
 			}
-			mae /= points.size();
-			mse /= points.size();
 
-			printProgressBar(startTime, k%EVALUATION_INTERVAL, EVALUATION_INTERVAL);
-
-			if(k%EVALUATION_INTERVAL == 0) {
-
-				if(k!=0) {
-					mainPanel.setMae(mae);
-					mainPanel.setMse(mse);
-					feedForward();
-
-				}
-				//					printProgressBar(startTime, k, EPOCHS);
-
+			if(k%EVALUATION_INTERVAL == 0 && k!=0) {
+				ProgressBarUtil.printProgressBar(startTime, k, EPOCHS);
+				feedForwardAndPaint();
 			}
 		}
 
-		printProgressBar(startTime, EPOCHS, EPOCHS);
-		feedForward();
-
+		ProgressBarUtil.printProgressBar(startTime, EPOCHS, EPOCHS);
+		feedForwardAndPaint();
 
 		mainPanel.setEditable(true);
 
 	}
 
-	public void feedForward() {
+	private void takeScreenshot() {
+		java.awt.Point locationOnScreen = mainPanel.getLocationOnScreen();
+		Rectangle r = new Rectangle(locationOnScreen, new Dimension(Panel.DIMENSION,Panel.DIMENSION));
+		ScreenshotTaker.take(r);		
+	}
+
+	public void feedForwardAndPaint() {
 		try {
-			ArrayList<Point> determinedPoints = new ArrayList<Point>();
+			ArrayList<Point> predictedPoints = new ArrayList<Point>();
 			ArrayList<Thread> threads = new ArrayList<Thread>();
+
 			for(int y=0;y<Panel.DIMENSION;y+=GRANULARITY) {
-				Thread t = new ThreadEvaluation(y, determinedPoints, nn.deepCopy());
+				Thread t = new ThreadEvaluation(y, predictedPoints, nn.deepCopy());
 				t.start();
 				threads.add(t);
 			}
@@ -164,18 +137,42 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 				t.join();
 			}
 
+			ArrayList<Point> points = mainPanel.getPoints();
+			Float[] actual = new Float[OUT];
+			Float[] predicted = new Float[OUT];
+			Float mae = 0f, mse = 0f;
+			int count = 0;
+			for(int j=0;j<mainPanel.getPoints().size();j++) {
+				for(int i=0;i<predictedPoints.size();i++) {
+					if(mainPanel.getPoints().get(j).getInput(0) == predictedPoints.get(i).getInput(0) &&
+							mainPanel.getPoints().get(j).getInput(1) == predictedPoints.get(i).getInput(1)) {
+						
+						actual[0] = points.get(j).getType().equals(Color.RED) ? 1f : 0;
+						actual[1] = points.get(j).getType().equals(Color.GREEN) ? 1f : 0;
+						actual[2] = points.get(j).getType().equals(Color.BLUE) ? 1f : 0;
+						
+						predicted[0] = predictedPoints.get(j).getType().getRed()/255f;
+						predicted[1] = predictedPoints.get(j).getType().getGreen()/255f;
+						predicted[2] = predictedPoints.get(j).getType().getBlue()/255f;
+						
+						mae += NeuralNetwork.calculateMAE(actual, predicted);
+						mse += NeuralNetwork.calculateMSE(actual, predicted);
+						count ++;
+					}
+				}
+			}
+			mae /= count;
+			mse /= count;
 
-			mainPanel.setPredictedPoints(determinedPoints);
+			mainPanel.setPredictedPoints(predictedPoints);
+			mainPanel.setMae(mae);
+			mainPanel.setMse(mse);
 
 			repaint();
 
 			Thread.sleep(1000);
 			//wait for the repaint to apply
-			SwingUtilities.invokeLater(() -> {
-				java.awt.Point locationOnScreen = mainPanel.getLocationOnScreen();
-				Rectangle r = new Rectangle(locationOnScreen, new Dimension(Panel.DIMENSION,Panel.DIMENSION));
-				ScreenshotTaker.take(r);
-			});
+			takeScreenshot();
 
 
 
@@ -188,36 +185,6 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 	public ArrayList<Point> getInputs() {
 		return mainPanel.getPoints();
 	}
-
-	private void printProgressBar(long startTime, int i, long total) {
-		clearLine();
-		printPB((int) ((i * 100.0) / total), ((System.currentTimeMillis() - startTime) * total) / (i + 1) - (System.currentTimeMillis() - startTime));
-
-	}
-
-	private void printPB(int percent, long remainingTimeMillis) {
-		int barLength = 50;
-		int filledLength = (percent * barLength) / 100;
-
-		StringBuilder bar = new StringBuilder();
-		bar.append("[");
-		for (int j = 0; j < barLength; j++) {
-			if (j < filledLength) {
-				bar.append("=");
-			} else {
-				bar.append(" ");
-			}
-		}
-		bar.append("] ");
-
-		System.out.print("\r" + bar + percent + "% - Remaining time: " + remainingTimeMillis / 1000 + "s");
-	}
-
-	private static void clearLine() {
-		System.out.print("\033[F");  // Move cursor up one line
-		System.out.print("\033[2K"); // Clear the entire line
-	}
-
 
 
 }
