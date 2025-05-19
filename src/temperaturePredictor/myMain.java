@@ -54,6 +54,7 @@ public class myMain {
 					+ RandomSingleton.randFloat(0, 0.1f)
 					- RandomSingleton.randFloat(0, 0.4f) 
 					- RandomSingleton.randFloat(0, 0.1f) ));
+			
 		}
 		
 		return results;

@@ -2,14 +2,15 @@ package classification;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import common.Point;
 import common.ScreenshotTaker;
@@ -18,12 +19,13 @@ import neuralNetwork.Input;
 import neuralNetwork.InputType;
 import neuralNetwork.NeuralNetwork;
 import neuralNetwork.NeuralNetworkBuilder;
+import neuralNetwork.NeuralNetworkException;
 import neuralNetwork.NeuralNetworkSettings;
 
 
 public class Frame extends JFrame implements RepaintListener, TrainListener {
 
-	public static final int EPOCHS = 10000, EVALUATION_INTERVAL = 50;
+	public static final int EPOCHS = 10000, EVALUATION_INTERVAL = 200;
 	public static final int WIDTH = Panel.DIMENSION + 300, HEIGHT = Panel.DIMENSION + 60, GRANULARITY=1;
 	private Panel mainPanel;
 	private ButtonPanel buttonPanel;
@@ -37,11 +39,7 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int w = (int) screenSize.getWidth();
 		int h = (int) screenSize.getHeight();
-		
-        setUndecorated(false);
-
 		setBounds((w-WIDTH) / 2, (h-HEIGHT) / 2, WIDTH, HEIGHT);
-
 		setLayout(new BoxLayout(getContentPane(), BoxLayout.LINE_AXIS));		
 
 		mainPanel = new Panel(this);
@@ -52,21 +50,20 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 
 		setVisible(true);
 
-		//		NeuralNetworkSettings.setUseInertia(true);
 		NeuralNetworkSettings.setUseDropout(true);
-		NeuralNetworkSettings.setDropoutRate(0.01f);
+		NeuralNetworkSettings.setDropoutRate(0.2f);
 		NeuralNetworkSettings.setUseInertia(true);
 
 		try {
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("inputs.dat"));
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("inputsEsempio2.dat"));
 			mainPanel.setPoints((ArrayList<Point>) ois.readObject());
 			ois.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-		
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		repaint();
-		
+
 		nn = NeuralNetworkBuilder.Builder()
 				.input(IN)
 				.hidden(4, ActivationFunctionType.GELU)
@@ -97,45 +94,58 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 
 	@Override
 	public void train() {
-		ScreenshotTaker.take();
+		mainPanel.setEditable(false);
+		java.awt.Point locationOnScreen = mainPanel.getLocationOnScreen();
+		Rectangle r = new Rectangle(locationOnScreen, new Dimension(Panel.DIMENSION,Panel.DIMENSION));
+		ScreenshotTaker.take(r);
 
 		ArrayList<Point> points = mainPanel.getPoints();
 		long startTime = System.currentTimeMillis();
 
-		try {
-			for(int k=0;k<EPOCHS;k++) {
-				Input[] in = new Input[nn.getIn()];
-				Float[] out = new Float[nn.getOut()];
+		for(int k=0;k<EPOCHS;k++) {
+			Input[] in = new Input[nn.getIn()];
+			Float[] out = new Float[nn.getOut()];
+			Float[] predicted = null;
 
-				for(int j=0;j<points.size();j++) {
-					in[0] = new Input(points.get(j).getInput(0), InputType.CLASSIFICATION);
-					in[1] = new Input(points.get(j).getInput(1), InputType.CLASSIFICATION);
+			float mae = 0, mse = 0;
+			for(int j=0;j<points.size();j++) {
+				in[0] = new Input(points.get(j).getInput(0), InputType.CLASSIFICATION);
+				in[1] = new Input(points.get(j).getInput(1), InputType.CLASSIFICATION);
 
-					out[0] = points.get(j).getType().equals(Color.RED) ? 1f : 0;
-					out[1] = points.get(j).getType().equals(Color.GREEN) ? 1f : 0;
-					out[2] = points.get(j).getType().equals(Color.BLUE) ? 1f : 0;
+				out[0] = points.get(j).getType().equals(Color.RED) ? 1f : 0;
+				out[1] = points.get(j).getType().equals(Color.GREEN) ? 1f : 0;
+				out[2] = points.get(j).getType().equals(Color.BLUE) ? 1f : 0;
 
-					nn.train(in, out);
+				try {
+					predicted = nn.train(in, out);
+				} catch (NeuralNetworkException e) {
+					e.printStackTrace();
 				}
 
-				if(k%EVALUATION_INTERVAL == 0) {
-					
-					if(k!=0) {
-						feedForward();
-
-					}
-//					printProgressBar(startTime, k, EPOCHS);
-					
-				}
+				mae += NeuralNetwork.calculateMAE(out, predicted);
+				mse += NeuralNetwork.calculateMSE(out, predicted);
 			}
+			mae /= points.size();
+			mse /= points.size();
 
-		} catch(Exception e) {
-			e.printStackTrace();
+			printProgressBar(startTime, k%EVALUATION_INTERVAL, EVALUATION_INTERVAL);
+
+			if(k%EVALUATION_INTERVAL == 0) {
+
+				if(k!=0) {
+					mainPanel.setMae(mae);
+					mainPanel.setMse(mse);
+					feedForward();
+
+				}
+				//					printProgressBar(startTime, k, EPOCHS);
+
+			}
 		}
 
 		printProgressBar(startTime, EPOCHS, EPOCHS);
 		feedForward();
-		
+
 
 		mainPanel.setEditable(true);
 
@@ -143,38 +153,29 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 
 	public void feedForward() {
 		try {
-			//evaluating
 			ArrayList<Point> determinedPoints = new ArrayList<Point>();
-			for(int x=0;x<Panel.DIMENSION;x+=GRANULARITY) {
-				for(int y=0;y<Panel.DIMENSION;y+=GRANULARITY) {
-					Input inX = new Input(x, InputType.CLASSIFICATION);
-					Input inY = new Input(y, InputType.CLASSIFICATION);
-
-					Float[] out;
-
-					out = nn.feedForward(inX, inY);
-
-
-					Color color;
-					int r = Math.min((int) (255*out[0]),255);
-					int g = Math.min((int) (255*out[1]),255);
-					int b = Math.min((int) (255*out[2]),255);
-					color = new Color(r,g,b,255);
-
-					determinedPoints.add(new Point(color,x,y));
-				}
+			ArrayList<Thread> threads = new ArrayList<Thread>();
+			for(int y=0;y<Panel.DIMENSION;y+=GRANULARITY) {
+				Thread t = new ThreadEvaluation(y, determinedPoints, nn.deepCopy());
+				t.start();
+				threads.add(t);
 			}
+			for(Thread t : threads) {
+				t.join();
+			}
+
+
 			mainPanel.setPredictedPoints(determinedPoints);
 
 			repaint();
-			
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			ScreenshotTaker.take();
+
+			Thread.sleep(1000);
+			//wait for the repaint to apply
+			SwingUtilities.invokeLater(() -> {
+				java.awt.Point locationOnScreen = mainPanel.getLocationOnScreen();
+				Rectangle r = new Rectangle(locationOnScreen, new Dimension(Panel.DIMENSION,Panel.DIMENSION));
+				ScreenshotTaker.take(r);
+			});
 
 
 
@@ -183,7 +184,7 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 		}
 
 	}
-	
+
 	public ArrayList<Point> getInputs() {
 		return mainPanel.getPoints();
 	}
@@ -217,6 +218,6 @@ public class Frame extends JFrame implements RepaintListener, TrainListener {
 		System.out.print("\033[2K"); // Clear the entire line
 	}
 
-	
+
 
 }

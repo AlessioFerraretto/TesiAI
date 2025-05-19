@@ -8,23 +8,15 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
-import classification.Frame;
 import classification.Panel;
+
 
 public class ScreenshotTaker {
 
 	private static int i=0;
-	
-	public static void take() {
-
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		int w = (int) screenSize.getWidth();
-		int h = (int) screenSize.getHeight();
-
-		take((w-Panel.DIMENSION) / 2 - 141, (h-Panel.DIMENSION) / 2 + 2, Panel.DIMENSION, Panel.DIMENSION);
-		
-	}
 	
 	private static void take(int x, int y, int w, int h) {
 		Robot r;
@@ -40,4 +32,9 @@ public class ScreenshotTaker {
 			ex.printStackTrace();
 		}
 	}
+
+	public static void take(Rectangle r) {
+		take((int) r.getX(),(int) r.getY(),(int) r.getWidth(),(int) r.getHeight());
+	}
+
 }

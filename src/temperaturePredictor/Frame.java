@@ -2,13 +2,17 @@ package temperaturePredictor;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.lang.runtime.TemplateRuntime;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
+import common.ScreenshotTaker;
 import neuralNetwork.ActivationFunctionType;
 import neuralNetwork.Input;
 import neuralNetwork.InputType;
@@ -23,11 +27,11 @@ public class Frame extends JFrame {
 	public final static int PADDING = 50, 
 			WIDTH = Panel.DIMENSION + 17 + PADDING*2 + Panel.OFFSET_X*2, //
 			HEIGHT = Panel.DIMENSION + 40 + PADDING*2 + Panel.OFFSET_Y*2, 
-			GRANULARITY=10, EVALUATION_INTERVAL = 1000, EPOCHS = 10000;
-	
+			GRANULARITY=1, EVALUATION_INTERVAL = 1000, EPOCHS = 1000;
+
 	private Panel mainPanel;
+	private JPanel spacerN,spacerS,spacerW,spacerE;
 	private static String FILE_SAVE = "save", FILE_EXTENSION = ".dat"; 
-	
 
 	NeuralNetwork nn;
 	int IN = 1, OUT = 1;
@@ -43,19 +47,19 @@ public class Frame extends JFrame {
 
 		setLayout(new BorderLayout());
 
-		JPanel spacer1 = new JPanel();
-		JPanel spacer2 = new JPanel();
-		JPanel spacer3 = new JPanel();
-		JPanel spacer4 = new JPanel();
-		spacer1.setPreferredSize(new Dimension(PADDING, PADDING));
-		spacer2.setPreferredSize(new Dimension(PADDING, PADDING));
-		spacer3.setPreferredSize(new Dimension(PADDING, PADDING));
-		spacer4.setPreferredSize(new Dimension(PADDING, PADDING));
+		spacerN = new JPanel();
+		spacerS = new JPanel();
+		spacerW = new JPanel();
+		spacerE = new JPanel();
+		spacerN.setPreferredSize(new Dimension(PADDING, PADDING));
+		spacerS.setPreferredSize(new Dimension(PADDING, PADDING));
+		spacerW.setPreferredSize(new Dimension(PADDING, PADDING));
+		spacerE.setPreferredSize(new Dimension(PADDING, PADDING));
 
-		add(spacer1, BorderLayout.NORTH);
-		add(spacer2, BorderLayout.SOUTH);
-		add(spacer3, BorderLayout.WEST);
-		add(spacer4, BorderLayout.EAST);
+		add(spacerN, BorderLayout.NORTH);
+		add(spacerS, BorderLayout.SOUTH);
+		add(spacerW, BorderLayout.WEST);
+		add(spacerE, BorderLayout.EAST);
 
 		mainPanel = new Panel();
 		mainPanel.setTemps(temps);
@@ -63,23 +67,28 @@ public class Frame extends JFrame {
 
 		setVisible(true);
 
-//		nn = NeuralNetwork.load(FILE_SAVE + FILE_EXTENSION);
+		//		nn = NeuralNetwork.load(FILE_SAVE + FILE_EXTENSION);
 
 		if(nn == null) {
+			NeuralNetworkSettings.setUseDropout(true);
+			NeuralNetworkSettings.setDropoutRate(0.1f);
+			NeuralNetworkSettings.setUseInertia(true);
+
 			nn = NeuralNetworkBuilder.Builder()
 					.input(IN)
-					.hidden(2, ActivationFunctionType.GELU)
-					.hidden(2, ActivationFunctionType.GELU)
+					.hidden(6, ActivationFunctionType.RELU)
+					.hidden(6, ActivationFunctionType.RELU)
 					.output(OUT, ActivationFunctionType.TANH)
 					.build();
-			
+
 			train();
+
 			feedForwardAndPaint();
-			
-//			nn.save(FILE_SAVE + FILE_EXTENSION);
+
+			//			nn.save(FILE_SAVE + FILE_EXTENSION);
 
 		}
-		
+
 	}
 
 	@Override
@@ -88,38 +97,46 @@ public class Frame extends JFrame {
 	}
 
 	public void train() {
-		int N = EPOCHS;
+		try {
+			Thread.sleep(250);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 		long startTime = System.currentTimeMillis();
 
 		//training 
-		for(int k=0;k<N;k++) {
+		for(int k=0;k<EPOCHS;k++) {
 			Input[] in = new Input[IN];
 			Float[] out = new Float[OUT];
 			Float[] predicted = null;
 
+			float mae = 0, mse = 0;
 			for(int j=0;j<mainPanel.getTemps().size();j++) {
 				in[0] = new Input(mainPanel.getTemps().get(j).getTime(), InputType.CLASSIFICATION);
 				out[0] = Input.normalize(mainPanel.getTemps().get(j).getValue(), InputType.TEMPERATURA);
-				
+
 				try {
 					predicted = nn.train(in, out);
 				} catch (NeuralNetworkException e) {
 					e.printStackTrace();
 				}
+
+				mae += NeuralNetwork.calculateMAE(out, predicted);
+				mse += NeuralNetwork.calculateMSE(out, predicted);
 			}
+			mae /= mainPanel.getTemps().size();
+			mse /= mainPanel.getTemps().size();
 
 			if(k%EVALUATION_INTERVAL == 0) {
-				printProgressBar(startTime, k, N);
-				
-				feedForwardAndPaint();
-				
-				float mae = NeuralNetwork.calculateMAE(out, predicted);
-				float mse = NeuralNetwork.calculateMSE(out, predicted);
-				System.out.print(String.format("\nMAE: %.8f\tMSE: %.8f", mae, mse));
-
+				if(k!=0) {
+					printProgressBar(startTime, k, EPOCHS);
+					mainPanel.setMae(mae);
+					mainPanel.setMse(mse);
+					feedForwardAndPaint();
+				}
 			}
 		}
-
 	}
 
 	public void feedForwardAndPaint() {
@@ -138,6 +155,18 @@ public class Frame extends JFrame {
 		}
 		mainPanel.setPredictedTemps(predictedTemps);
 
+		try {
+			Thread.sleep(250);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		//wait for the repaint to apply
+		SwingUtilities.invokeLater(() -> {
+			Point locationOnScreen = mainPanel.getLocationOnScreen();
+			Rectangle r = new Rectangle(locationOnScreen, mainPanel.getSize());
+			ScreenshotTaker.take(r);
+
+		});
 		repaint();
 	}
 

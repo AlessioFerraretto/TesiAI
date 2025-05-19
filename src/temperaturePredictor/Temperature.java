@@ -2,7 +2,7 @@ package temperaturePredictor;
 
 public class Temperature {
 
-	public static final int MAX_TIME = 60 * 24, MAX_TEMP = 35, MIN_TEMP = 15; // in minutes
+	public static final int MAX_TIME = 60 * 24, MAX_TEMP = 40, MIN_TEMP = 20; // in minutes
 
 	private int time; //minutes
 	private float value;
