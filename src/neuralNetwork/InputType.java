@@ -1,15 +1,16 @@
 package neuralNetwork;
 
 import classification.Panel;
-import temperaturePredictor.Temperature;
+import predictor.DataPoint;
 
 public enum InputType {
 
 	CLASSIFICATION(0,Panel.DIMENSION),
-	TEMPERATURA(0,50),
-	UMIDITA(0,100);
+	TEMPERATURE(-100,100),
+	CO2(-3000,3000),
+	UMIDITY(-200,200);
 	
-	private float minValue, maxValue;
+	private float minValue, maxValue; //unit: amount that defines how many units are in a line of the graph
 	
 	InputType(float minValue, float maxValue) {
 		this.minValue = minValue;
@@ -22,5 +23,9 @@ public enum InputType {
 	
 	public float getMaxValue() {
 		return maxValue;
+	}
+
+	public float getDelta() {
+		return getMaxValue() - getMinValue();
 	}
 }

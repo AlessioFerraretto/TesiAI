@@ -1,4 +1,4 @@
-package temperaturePredictor;
+package predictor;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -6,19 +6,22 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
+import neuralNetwork.Input;
+import neuralNetwork.InputType;
+
 public class Panel extends JPanel  {
 
 	public static final int DIMENSION = 700, SIZE = 6, PREDICTED_SIZE = 6, OFFSET_X = 60, OFFSET_Y = 60;
 
-	private ArrayList<Temperature> temps;
-	private ArrayList<Temperature> predictedTemps;
+	private ArrayList<DataPoint> dataValues;
+	private ArrayList<DataPoint> predictedTemps;
 	private float mae, mse;
 
 	public Panel() {
 		super();
 
-		temps = new ArrayList<Temperature>();
-		predictedTemps = new ArrayList<Temperature>();
+		dataValues = new ArrayList<DataPoint>();
+		predictedTemps = new ArrayList<DataPoint>();
 	}
 
 	public void paint(Graphics g) {
@@ -31,7 +34,8 @@ public class Panel extends JPanel  {
 		g.setColor(Color.BLACK);
 
 		int deltaHours = 24;
-		int deltaDegrees = Temperature.MAX_TEMP-Temperature.MIN_TEMP;
+		VisualizationType visualizationType = dataValues.get(0).getVisualizationType();
+		int deltaValue = (int) ((visualizationType.getMaxValue()-visualizationType.getMinValue()) /visualizationType.getUnit());
 		int spazioYPerOre = 30;
 		int spazioXPerGradi = -40;
 
@@ -44,25 +48,25 @@ public class Panel extends JPanel  {
 			}
 		}
 
-		for(int t=0;t<=deltaDegrees;t++) {
-			g.drawLine(0+OFFSET_X, t*DIMENSION/deltaDegrees+OFFSET_Y, DIMENSION+OFFSET_X, t*DIMENSION/deltaDegrees+OFFSET_Y);
+		for(int t=0;t<=deltaValue;t++) {
+			g.drawLine(0+OFFSET_X, t*DIMENSION/deltaValue+OFFSET_Y, DIMENSION+OFFSET_X, t*DIMENSION/deltaValue+OFFSET_Y);
 
 			if(t%5==0) {
-				g.drawString(Temperature.MAX_TEMP-t+"°", 0+OFFSET_X+spazioXPerGradi, t*DIMENSION/deltaDegrees+OFFSET_Y);
+				g.drawString((int) (visualizationType.getMaxValue()-t*visualizationType.getUnit())+visualizationType.getSymbol(), 0+OFFSET_X+spazioXPerGradi, t*DIMENSION/deltaValue+OFFSET_Y);
 			}
 		}
 
 		g.setColor(Color.blue);
-		for(Temperature p : temps) {
-			int x = p.getTime() * Panel.DIMENSION / Temperature.MAX_TIME;
-			int y = (int) ((Temperature.MAX_TEMP - p.getValue()) * Panel.DIMENSION/deltaDegrees);
+		for(DataPoint p : dataValues) {
+			int x = p.getTime() * Panel.DIMENSION / DataPoint.MAX_TIME;
+			int y = (int) ( Panel.DIMENSION - (((p.getValue() - p.getVisualizationType().getMinValue()) / p.getVisualizationType().getDelta()) * Panel.DIMENSION));
 			g.fillRect(x-SIZE/2 +OFFSET_X, y-SIZE/2 +OFFSET_Y, SIZE, SIZE);
 		}
 
 		g.setColor(Color.red);
-		for(Temperature p : predictedTemps) {
-			int x = p.getTime() * Panel.DIMENSION / Temperature.MAX_TIME;
-			int y = (int) ((Temperature.MAX_TEMP - p.getValue()) * Panel.DIMENSION/deltaDegrees);
+		for(DataPoint p : predictedTemps) {
+			int x = p.getTime() * Panel.DIMENSION / DataPoint.MAX_TIME;
+			int y = (int) ( Panel.DIMENSION - (((p.getValue() - p.getVisualizationType().getMinValue()) / p.getVisualizationType().getDelta()) * Panel.DIMENSION));
 			g.fillOval(x-PREDICTED_SIZE/2 +OFFSET_X, y-PREDICTED_SIZE/2 +OFFSET_Y, PREDICTED_SIZE, PREDICTED_SIZE);
 		}
 
@@ -72,16 +76,16 @@ public class Panel extends JPanel  {
 
 	}
 
-	public ArrayList<Temperature> getTemps() {
-		return temps;
+	public ArrayList<DataPoint> getDataValues() {
+		return dataValues;
 	}
 
-	public void setPredictedTemps(ArrayList<Temperature> predictedTemps) {
+	public void setPredictedTemps(ArrayList<DataPoint> predictedTemps) {
 		this.predictedTemps = predictedTemps;
 	}
 
-	public void setTemps(ArrayList<Temperature> temps) {
-		this.temps = temps;
+	public void setDataValues(ArrayList<DataPoint> dataValues) {
+		this.dataValues = dataValues;
 	}
 
 	public void setMae(float mae) {
