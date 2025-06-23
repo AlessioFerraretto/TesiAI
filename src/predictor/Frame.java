@@ -5,12 +5,12 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.lang.runtime.TemplateRuntime;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import common.ProgressBarUtil;
 import common.ScreenshotTaker;
@@ -27,7 +27,7 @@ public class Frame extends JFrame {
 	public final static int PADDING = 50, 
 			WIDTH = Panel.DIMENSION + 17 + PADDING*2 + Panel.OFFSET_X*2, //
 			HEIGHT = Panel.DIMENSION + 40 + PADDING*2 + Panel.OFFSET_Y*2, 
-			GRANULARITY=10, EVALUATION_INTERVAL = 100, EPOCHS = 10000;
+			GRANULARITY=1, EVALUATION_INTERVAL = 2000, EPOCHS = 100000;
 
 	private Panel mainPanel;
 	private JPanel spacerN,spacerS,spacerW,spacerE;
@@ -70,18 +70,19 @@ public class Frame extends JFrame {
 		add(mainPanel, BorderLayout.CENTER);
 
 		setVisible(true);
-
+		
 		//nn = NeuralNetwork.load(FILE_SAVE + FILE_EXTENSION);
 
+		
 		if(nn == null) {
 			NeuralNetworkSettings.setUseDropout(true);
-			NeuralNetworkSettings.setDropoutRate(0.1f);
+			NeuralNetworkSettings.setDropoutRate(0.01f);
 			NeuralNetworkSettings.setUseInertia(true);
-
+			
 			nn = NeuralNetworkBuilder.Builder()
 					.input(IN)
-					.hidden(2, ActivationFunctionType.GELU)
-					.hidden(2, ActivationFunctionType.GELU)
+					.hidden(4, ActivationFunctionType.GELU)
+					.hidden(4, ActivationFunctionType.GELU)
 					.output(OUT, ActivationFunctionType.SIGMOID)
 					.build();
 
@@ -179,18 +180,17 @@ public class Frame extends JFrame {
 
 	private void takeScreenshot() {
 		
-		
 //		//wait for the repaint to apply
-//
-//		try {
-//			Thread.sleep(1000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//		
-//		Point locationOnScreen = mainPanel.getLocationOnScreen();
-//		Rectangle r = new Rectangle(locationOnScreen, mainPanel.getSize());
-//		ScreenshotTaker.take(r);
+
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		Point locationOnScreen = mainPanel.getLocationOnScreen();
+		Rectangle r = new Rectangle(locationOnScreen, mainPanel.getSize());
+		ScreenshotTaker.take(r);
 	}
 
 	

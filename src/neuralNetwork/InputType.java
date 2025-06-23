@@ -8,7 +8,8 @@ public enum InputType {
 	CLASSIFICATION(0,Panel.DIMENSION),
 	TEMPERATURE(-100,100),
 	CO2(-3000,3000),
-	UMIDITY(-200,200);
+	UMIDITY(-200,200),
+	TVOC(-5000,5000);
 	
 	private float minValue, maxValue; //unit: amount that defines how many units are in a line of the graph
 	

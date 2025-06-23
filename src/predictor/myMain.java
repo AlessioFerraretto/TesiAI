@@ -10,16 +10,16 @@ import neuralNetwork.InputType;
 
 public class myMain {
 
-	private static final String FILE_NAME = "Air Quality-co.csv", SEPARATOR = ",";
+	private static final String FILE_NAME = "Air Quality-tv.csv", SEPARATOR = ",";
 	
 	public static void main(String[] args) {
 
-		Frame f = new Frame(readFile(FILE_NAME));
-//		Frame f = new Frame(generateRandom(InputType.TEMPERATURA, VisualizationType.TEMPERATURA));
+		new Frame(readFile(FILE_NAME, InputType.TVOC, VisualizationType.TVOC));
+//		new Frame(generateRandom(InputType.TEMPERATURE, VisualizationType.TEMPERATURE));
 
 	}
 	
-	public static ArrayList<DataPoint> readFile(String fileName) {
+	public static ArrayList<DataPoint> readFile(String fileName, InputType inputType, VisualizationType visualizationType) {
 		File f = new File(fileName);
 		ArrayList<DataPoint> results = new ArrayList<>();
 
@@ -34,7 +34,7 @@ public class myMain {
 				String time = values[0];
 				float value = Float.parseFloat(values[1]);
 				if(i%6 == 0)
-					results.add(new DataPoint(InputType.CO2, VisualizationType.CO2, time, value));
+					results.add(new DataPoint(inputType, visualizationType, time, value));
 				i++;
 			}
 			

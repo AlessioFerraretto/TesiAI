@@ -37,7 +37,7 @@ public class Panel extends JPanel  {
 		VisualizationType visualizationType = dataValues.get(0).getVisualizationType();
 		int deltaValue = (int) ((visualizationType.getMaxValue()-visualizationType.getMinValue()) /visualizationType.getUnit());
 		int spazioYPerOre = 30;
-		int spazioXPerGradi = -40;
+		int spazioXPerGradi = -60;
 
 		g.setColor(Color.black);
 		for(int h=0;h<=deltaHours;h++) {
@@ -50,10 +50,7 @@ public class Panel extends JPanel  {
 
 		for(int t=0;t<=deltaValue;t++) {
 			g.drawLine(0+OFFSET_X, t*DIMENSION/deltaValue+OFFSET_Y, DIMENSION+OFFSET_X, t*DIMENSION/deltaValue+OFFSET_Y);
-
-			if(t%5==0) {
-				g.drawString((int) (visualizationType.getMaxValue()-t*visualizationType.getUnit())+visualizationType.getSymbol(), 0+OFFSET_X+spazioXPerGradi, t*DIMENSION/deltaValue+OFFSET_Y);
-			}
+			g.drawString((int) (visualizationType.getMaxValue()-t*visualizationType.getUnit())+visualizationType.getSymbol(), 0+OFFSET_X+spazioXPerGradi, t*DIMENSION/deltaValue+OFFSET_Y);
 		}
 
 		g.setColor(Color.blue);
