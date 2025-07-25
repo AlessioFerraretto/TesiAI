@@ -23,7 +23,6 @@ import neuralNetwork.NeuralNetworkBuilder;
 import neuralNetwork.NeuralNetworkException;
 import neuralNetwork.NeuralNetworkSettings;
 
-
 public class Frame extends JFrame implements RepaintListener, TrainListener {
 
 	public static final int EPOCHS = 10000, EVALUATION_INTERVAL = 200;

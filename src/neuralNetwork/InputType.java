@@ -9,7 +9,8 @@ public enum InputType {
 	TEMPERATURE(-100,100),
 	CO2(-3000,3000),
 	UMIDITY(-200,200),
-	TVOC(-5000,5000);
+	TVOC(-5000,5000), 
+	COLOR(-255*3,255*3);
 	
 	private float minValue, maxValue; //unit: amount that defines how many units are in a line of the graph
 	
